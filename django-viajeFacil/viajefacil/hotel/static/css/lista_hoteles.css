@@ -1,0 +1,127 @@
+.container-search-section{
+    background-color: #004d00;
+    padding: 30px;
+}
+
+.search-form {
+    margin-top: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.search-form input, .search-form button {
+    padding: 10px;
+    font-size: 16px;
+    flex: 1 1 150px;
+}
+
+.search-form button {
+    background-color: #66bb6a;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.autocomplete-container {
+    position: relative;
+    width: 100%;
+}
+
+#destino {
+    width: 100%;
+    box-sizing: border-box; /* Fundamental para que no cambie de tamaño */
+    background-color: #ffffff; /* mismo fondo blanco que el input */
+    border: 1px solid #ccc;
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 5px;
+}
+
+.sugerencias {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: #ffffff; /* mismo color que el input */
+    border: 1px solid #ccc;
+    border-top: none;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 100;
+    box-sizing: border-box;
+    border-radius: 0 0 5px 5px; /* solo esquinas inferiores redondeadas */
+}
+
+.sugerencia-item {
+    padding: 10px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.sugerencia-item:hover {
+    background-color: #d1ffd1; /* verde clarito al pasar */
+}
+
+.container-filter-section {
+    /*display: flex;*/
+    padding: 30px 50px;
+    gap: 20px;
+    background-color: #f8f8f0;
+    /*flex-wrap: wrap;*/
+}
+  
+.filter-section {
+    width: 250px;
+    background-color: #c8efc1;
+    padding: 20px;
+    border-radius: 10px;
+    font-size: 14px;
+}
+  
+.filter-section label {
+    font-weight: bold;
+    display: block;
+    margin-top: 15px;
+    margin-bottom: 5px;
+}
+  
+.container-hotel-list-section{
+    background-color: #eeee31;
+}
+
+.hotel-list-section {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: auto;
+}
+
+.hotel-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+}
+
+.hotel-card {
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    overflow: hidden;
+    background-color: #fff;
+    transition: box-shadow 0.3s ease;
+}
+
+.hotel-card:hover {
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+.hotel-image {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+}
+
+.hotel-info {
+    padding: 1rem;
+}
+  

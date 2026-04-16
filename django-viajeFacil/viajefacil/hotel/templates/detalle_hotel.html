@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %} Viaje Fácil {% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/lista_hoteles.css' %}">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+{% endblock %}
+
+{% block content %}
+
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-2 ps-4 p-3">
+            {% include 'filtros_hoteles.html' %}
+            <!--Fin filtros-->
+        </div>
+        <!--Encabezado-->
+        <div class="col pt-4 ps-5 ">
+            <div class="row">
+                <!--Datos del hotel-->
+                <div class="row">
+                    <div class="col-4 pt-4">
+                        <img src="{% static 'img/hoteles/' %}{{ hotel.imagen_hotel }}.png" class="img-fluid rounded"
+                            alt="{{ hotel.nombre_hotel }}">
+
+                    </div>
+                    <div class="col-6">
+                        <section class="ps-0 pt-4 hotel-list-section">
+                            <h2 class="fs-1">{{ hotel.nombre_hotel }}
+                            </h2>
+                            <i class="fst-normal fw-bold fs-3">
+                                {{hotel.cantidad_estrellas_hotel}}</i>
+                            <i class="bi bi-star-fill text-warning fs-2 pe-2"></i>
+                            <p class="fs-4">
+                                {{ hotel.descripcion_hotel }}
+                            </p>
+                            <p class="fs-4"><i class="bi bi-geo-alt-fill text-danger fs-3 pe-0"></i>
+                                {{hotel.Direccion}}
+                            </p>
+                        </section>
+                    </div>
+                    <div class="row mt-4 ms-2 mb-0">
+                        <p class="fs-3 fw-italic">
+                            El hotel ofrece:
+                        </p>
+                        {% for s in servicios %}
+                        <div class="col-3 mt-0 mb-3">
+                            <div style="background-color: #c8efc1;" class=" border border-transparent card h-100">
+                                <div class="card-body ">
+                                    <h5 class="card-title text-dark fs-6">
+                                        {{ s.nombre_servicio}}
+                                    </h5>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <!--Card de las categorias del hotel -->
+
+                <div class="row mt-3">
+                    <h3 class="pb-3 fs-1">Habitaciones disponibles</h3>
+                    {% if combinaciones %}
+                    {% for combo in combinaciones %}
+                    <div class="card pb-2 mb-4">
+                        <div class="row">
+                            {% if forloop.first %}
+                            <p style="background-color: #c8efc1;" class="fs-4 ps-3 pt-2 pb-2">
+                                <i class="bi bi-star-fill fs-3 pe-2 text-white"></i> Recomendado
+                            </p>
+                            {% endif %}
+                            <div class="col-5">
+                                <img src="{% static 'img/categorias/' %}{{ combo.0.imagen_categoria }}.png"
+                                    class="img-fluid rounded" alt="{{ combo.0.nombre_categoria }}">
+                            </div>
+                            <div class="col-7">
+                                <div class="card-body">
+                                    <h5 class="card-title fw-bold fs-4">Combinación sugerida</h5>
+
+                                    {% for habitacion in combo %}
+                                    <p class="card-text fs-5 mb-0">
+                                        <span class="fs-4">
+                                            {{ habitacion.nombre_categoria }} {{ habitacion.descripcion_categoria }} -
+                                            Capacidad: {{ habitacion.capacidad_categoria }} personas
+                                        </span>
+                                        <br><span class="pt-1 fw-bold">Precio: ${{ habitacion.precio_categoria }} por
+                                            noche</span>
+                                    </p>
+                                    <p class="fs-5 mb-0">Servicios:</p>
+                                    <p class="ms-2 fs-5">
+                                        {% for servicio in habitacion.servicios %}
+                                        <span class="fw-bold">{{ servicio.nombre_servicio }}{% if not forloop.last %},
+                                            {% endif %}</span>
+                                        {% empty %}
+                                        <span>Sin servicios</span>
+                                        {% endfor %}
+                                        <hr class="border border-5 border-success rounded-3">
+                                    </p>
+                                    {% endfor %}
+                                </div>
+                                <div class="col-12 text-end pe-4 pb-2">
+                                    <form method="post" action="{% url 'hotel:generar_detalle_reserva' %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="indice" value="{{ forloop.counter0 }}">
+                                        <button type="submit" class="btn btn-success btn-lg">Reservar ahora</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% empty %}
+                    <p class="text-danger fs-4">No se encontraron combinaciones disponibles.</p>
+                    {% endfor %}
+
+                    {% else %}
+                    <p class="fs-4 text-danger">No hay combinaciones disponibles para esta cantidad de personas y
+                        habitaciones.</p>
+                    {% endif %}
+                </div>
+
+            </div>
+        </div>
+
+
+
+    </div>
+
+
+
+    {% endblock %}
+
+
+
+    {% block script %}
+    <script>
+        const DESTINOS_API_URL = "{% url 'hotel:api_destinos' %}";
+    </script>
+    <script src="{% static 'js/lista_hoteles.js' %}"></script>
+    {% endblock %}"

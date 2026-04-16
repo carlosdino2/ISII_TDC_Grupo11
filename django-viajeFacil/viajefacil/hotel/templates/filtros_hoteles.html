@@ -1,0 +1,59 @@
+{% load static %}
+
+
+<!-- templates/partials/filtros_hoteles.html -->
+{% include 'partials/buscador_hotel.html' %}
+
+<section class="filter-section fs-6">
+    <h3>Filtrar por:</h3>
+
+    <label>Precio</label>
+    <input id="range-precio" type="range" min="1000" max="100000" step="1000" class="w-100" />
+    <p id="range-valor">$1.000 - $1000.000+</p>
+    <div class="row">
+        <div class="col-6">
+            <input id="input-desde" type="number" class="w-100" placeholder="Desde">
+        </div>
+        <div class="col-6">
+            <input id="input-hasta" type="number" class="w-100" placeholder="Hasta">
+        </div>
+    </div>
+
+    <div class="pt-2">
+        <a href="{% url 'hotel:lista_hoteles' %}" class="btn btn-success w-100">Aplicar</a>
+    </div>
+
+    <label>Categoría del alojamiento</label>
+    <div><input type="checkbox" /> 3 estrellas</div>
+    <div><input type="checkbox" /> 4 estrellas</div>
+    <div><input type="checkbox" /> 5 estrellas</div>
+
+    <label>Servicios del hotel</label>
+    <div><input type="checkbox" /> Terraza</div>
+    <div><input type="checkbox" /> Desayuno</div>
+    <div><input type="checkbox" /> Estacionamiento</div>
+    <div><input type="checkbox" /> Ascensor</div>
+</section>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const range = document.getElementById('range-precio');
+        const label = document.getElementById('range-valor');
+        const inputDesde = document.getElementById('input-desde');
+        const inputHasta = document.getElementById('input-hasta');
+
+        if (range && label && inputDesde && inputHasta) {
+            range.addEventListener('input', function () {
+                const valor = parseInt(this.value);
+                const valorFormat = valor.toLocaleString('es-AR');
+                label.textContent = `$${valorFormat} - $100.000+`;
+                inputDesde.value = valor;
+                inputHasta.value = 100000;
+            });
+        }
+    });
+</script>
+
+
+</script>

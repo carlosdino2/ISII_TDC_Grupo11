@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Factura de Reserva</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .factura-container {
+            max-width: 800px;
+            margin: auto;
+            border: 1px solid #ccc;
+            padding: 20px;
+        }
+        .factura-header h2 { border-bottom: 2px solid #198754; padding-bottom: 0.5rem; }
+        .factura-section { margin-top: 1.5rem; }
+        .factura-table { width: 100%; border-collapse: collapse; }
+        .factura-table th, .factura-table td {
+            padding: 0.5rem;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+        .text-right { text-align: right; }
+    </style>
+</head>
+{% load humanize %}
+<body>
+<div class="factura-container">
+    <div class="factura-header">
+        <h2>Factura de Reserva</h2>
+        <p>N° 000-{{ reserva.nro_reserva }}</p>
+        <small>Emitida el {{ reserva.fecha_reserva }}</small>
+    </div>
+
+    <div class="factura-section">
+        <h4>Datos del Viajero</h4>
+        <p><strong>Identificación:</strong> {{ viajero.identificacion_viajero }}</p>
+        <p><strong>Nombre:</strong> {{ viajero.nombre_completo }}</p>
+        <p><strong>Email:</strong> {{ viajero.email_viajero }}</p>
+        <p><strong>Teléfono:</strong> {{ viajero.telefono_viajero }}</p>
+        <p><strong>Dirección:</strong> {{ viajero.direccion_viajero }}</p>
+    </div>
+
+    <div class="factura-section">
+        <h4>Detalles de la Reserva</h4>
+        <p><strong>Hotel:</strong> {{ hotel.nombre_hotel }}</p>
+        <p><strong>Dirección:</strong> {{ hotel.direccion_hotel }}</p>
+        <p><strong>Estado:</strong> {{ reserva.estado }}</p>
+        <p><strong>Noches:</strong> {{ reserva.noches }}</p>
+        <p><strong>Check-in:</strong> {{ reserva.checkin }} | <strong>Check-out:</strong> {{ reserva.checkout }}</p>
+    </div>
+
+    <div class="factura-section">
+        <h4>Habitaciones</h4>
+        <table class="factura-table">
+            <thead>
+                <tr>
+                    <th>Categoría</th>
+                    <th>Cantidad</th>
+                    <th>Precio unitario</th>
+                    <th>Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for d in detalle %}
+                <tr>
+                    <td>{{ d.categoria }}</td>
+                    <td>{{ d.cantidad_habitaciones }}</td>
+                    <td class="text-right">${{ d.precio_unitario|floatformat:0|intcomma }}</td>
+                    <td class="text-right">${{ d.sub_total|floatformat:0|intcomma }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr><td colspan="3" class="text-right"><strong>Total</strong></td><td class="text-right">${{ reserva.monto_total_reserva|floatformat:0|intcomma }}</td></tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+</body>
+</html>

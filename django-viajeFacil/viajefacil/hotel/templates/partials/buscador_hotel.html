@@ -1,0 +1,59 @@
+{% load static %}
+<div class="mb-3">
+    <div class="container filter-section bg-success">
+    <p class="fs-4 text-white mb-1 mt-0">
+        Alojamiento
+    </p>
+    <form method="get" action="{% url 'hotel:hoteles_por_destino' %}">
+        <!-- Destino -->
+        <div class="mb-3 position-relative">
+            <input type="text" id="destino" class="form-control" placeholder="Elija un destino" autocomplete="off">
+            <input type="hidden" id="destino_tipo" name="tipo">
+            <input type="hidden" id="destino_id" name="id">
+            <div id="sugerencias" class="list-group position-absolute w-100" style="z-index: 1000;"></div>
+        </div>
+
+        <!-- Fecha entrada -->
+        <div class="mb-3">
+            <input type="date" id="fecha_entrada" name="fecha_ingreso" class="form-control"
+                   value="{{ request.session.busqueda.fecha_ingreso|default:'' }}">
+        </div>
+
+        <!-- Fecha salida -->
+        <div class="mb-3">
+            <input type="date" id="fecha_salida" name="fecha_egreso" class="form-control"
+                   value="{{ request.session.busqueda.fecha_egreso|default:'' }}">
+        </div>
+
+        <div class="row">
+            <!-- Personas -->
+            <div class="col-6">
+                <div class="mb-3 position-relative">
+                    <i class="bi bi-person-fill position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                    <input onkeydown="return false;" type="number" name="cantidad_personas" min="1" max="6"
+                           class="form-control ps-5" placeholder="2"
+                           value="{{ request.session.busqueda.cantidad_personas|default:2 }}">
+                </div>
+
+            </div>
+            <div class="col-6">
+
+                <!-- Habitaciones -->
+                <div class="mb-3 position-relative">
+                    <i class="fa-solid fa-bed position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                    <input onkeydown="return false;" type="number" name="cantidad_habitaciones" min="1" max="6"
+                           class="form-control ps-5" placeholder="1"
+                           value="{{ request.session.busqueda.cantidad_habitaciones|default:1 }}">
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Botón -->
+        <div class="d-grid">
+            <button type="submit" class="btn btn-light text-success fw-bold">Buscar</button>
+        </div>
+    </form>
+    </div>
+
+</div>
