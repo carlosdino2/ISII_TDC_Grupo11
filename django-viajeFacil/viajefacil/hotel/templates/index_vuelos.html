@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %} Viaje Fácil {% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/index_alojamientos.css' %}">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+
+{% endblock %}
+
+{% block content %}
+<!--Buscador de vuelo-->
+{% include 'buscador-vuelo.html' %}
+{% load static %}
+<!--Fin buscador vuelo-->
+
+<div class="container-popular-destinations">
+    <section class="popular-destinations">
+        <div class="container">
+            <h2 class="h1 fs-1 fst-italic">¡Vuelos más populares!</h2>
+            <p class="fs-3 text-muted">Las opciones más elegidas por la comunidad viajera de Argentina</p>
+    </section>
+    
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+    const DESTINOS_API_URL = "{% url 'hotel:api_destinos' %}";
+</script>
+<script src="{% static 'js/index_alojamientos.js' %}"></script>
+
+<!--Verificacion de la fecha-->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const hoy = new Date().toISOString().split("T")[0]; // formato YYYY-MM-DD
+
+        const entrada = document.getElementById("fecha_entrada");
+        const salida = document.getElementById("fecha_salida");
+
+        entrada.min = hoy;
+        salida.min = hoy;
+
+        entrada.addEventListener("change", function () {
+            salida.min = entrada.value;
+            if (salida.value < entrada.value) {
+                salida.value = entrada.value;
+            }
+        });
+    });
+</script>
+
+{% endblock %}

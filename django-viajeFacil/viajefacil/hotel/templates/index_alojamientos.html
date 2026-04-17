@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %} Viaje Fácil {% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/index_alojamientos.css' %}">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+
+{% endblock %}
+
+{% block content %}
+<!--Buscador de hotel-->
+{% include 'buscador-hotel.html' %}
+{% load static %}
+<!--Fin buscador hotel-->
+
+<div class="container-popular-destinations">
+    <section class="popular-destinations">
+        <div class="container">
+            <h2 class="h1 fs-1 fst-italic">¡Destinos más populares!</h2>
+            <p class="fs-3 text-muted">Las opciones más elegidas por la comunidad viajera de Argentina</p>
+    </section>
+    <!--Inicio lista de hoteles-->
+    <div class="ps-5 pt-3 row">
+        {% for hotel in hoteles %}
+        <div class="col-6 mb-3 ">
+            <div class="card" style="max-width: 800px;">
+                <div class="row g-0">
+                    <div class="col-5 pt-4">
+                        <img src="{% static 'img/hoteles/' %}{{ hotel.imagen_hotel }}.png" class="img-fluid rounded" alt="Imagen del hotel">
+                    </div>
+                    <div class="col-md-7">
+                        <div class="card-body fs-4">
+                            <h5 class="card-title fs-3 fw-bold">{{ hotel.nombre_hotel }}</h5>
+                            <p class="card-text">
+                                <i class="bi bi-geo-alt-fill text-danger fs-3 pe-0"></i>
+                                {{ hotel.direccion }}
+                                <i class="ps-5 fst-normal fw-bold">
+                                    {{hotel.cantidad_estrellas_hotel}}</i>
+                                <i class="bi bi-star-fill text-warning fs-3 pe-2"></i>
+                            </p>
+                            <p class="card-text">Impuestos nacionales incluidos</p>
+                            <a href="{% url 'hotel:detalle_hotel' hotel.id %}" class="btn btn-success btn-lg">Ver
+                                    detalle</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        <div class="d-flex justify-content-center my-4">
+            <nav aria-label="Paginación de hoteles">
+                <ul class="pagination">
+                    {% if hoteles.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ hoteles.previous_page_number }}">&laquo; Anterior</a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">&laquo; Anterior</span>
+                    </li>
+                    {% endif %}
+
+                    {% for num in hoteles.paginator.page_range %}
+                    <li class="page-item {% if hoteles.number == num %}active{% endif %}">
+                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                    </li>
+                    {% endfor %}
+
+                    {% if hoteles.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ hoteles.next_page_number }}">Siguiente &raquo;</a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Siguiente &raquo;</span>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+
+    </div>
+    <!--Fin lista de hoteles-->
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+    const DESTINOS_API_URL = "{% url 'hotel:api_destinos' %}";
+</script>
+<script src="{% static 'js/index_alojamientos.js' %}"></script>
+
+<!--Verificacion de la fecha-->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const hoy = new Date().toISOString().split("T")[0]; // formato YYYY-MM-DD
+
+        const entrada = document.getElementById("fecha_entrada");
+        const salida = document.getElementById("fecha_salida");
+
+        entrada.min = hoy;
+        salida.min = hoy;
+
+        entrada.addEventListener("change", function () {
+            salida.min = entrada.value;
+            if (salida.value < entrada.value) {
+                salida.value = entrada.value;
+            }
+        });
+    });
+</script>
+
+{% endblock %}

@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% load static %}
+
+
+{% block title %}Factura de Reserva{% endblock %}
+
+{% block css %}
+<style>
+    .factura-container {
+        max-width: 900px;
+        margin: auto;
+        padding: 2rem;
+        background: #fff;
+        border: 1px solid #ccc;
+        border-radius: 1rem;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    .factura-boton {
+        padding: 0 2rem;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    .factura-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .factura-header h2 {
+        margin: 0;
+    }
+
+    .factura-section {
+        margin-bottom: 1.5rem;
+    }
+
+    .factura-section h4 {
+        border-bottom: 5px solid #198754;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .factura-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .factura-table th,
+    .factura-table td {
+        border: none;
+
+        padding: 0.75rem;
+        text-align: left;
+    }
+
+    .factura-totales td {
+        font-weight: bold;
+    }
+
+    .text-right {
+        text-align: right;
+    }
+
+    @media print {
+
+        /* Oculta el navbar y footer */
+        nav,
+        footer,
+        .d-print-none,
+        button {
+            display: none !important;
+        }
+
+        /* Margen mínimo en la hoja */
+        @page {
+            margin: 10mm;
+        }
+
+        body {
+            margin: 0;
+            font-size: 9pt;
+        }
+
+        .factura {
+            page-break-inside: avoid;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="factura-boton d-flex justify-content-center mt-3 mb-3">
+    <button class="btn btn-success" onclick="window.print()">
+        🖨️ Imprimir o guardar PDF
+    </button>
+</div>
+
+<div class="factura-container border border-5 border-success mb-5">
+    <div class="factura-header">
+        <h2>Comprobante de cancelación</h2>
+        <p>Reserva N° 000-{{ id }}</p>
+        <small>Emitida el {{ fecha_reserva }}</small>
+    </div>
+
+    <div class="factura-section">
+        <h4>Detalles de la Reserva</h4>
+        <p><strong>Hotel:</strong> {{ nombre_hotel }}</p>
+        <strong>Estado:</strong> {{ descripcion_estado_reserva }}
+        <strong>Check-in:</strong> {{ fecha_ingreso}} | <strong>Check-out:</strong> {{ fecha_egreso }}</p>
+    </div>
+
+    <div class="factura-section">
+            <p>
+                <strong>
+                    Monto total: 
+                </strong>
+                ${{ monto_total_hotel|floatformat:0|intcomma }}
+            </p>
+    </div>
+</div>
+
+
+
+{% endblock %}

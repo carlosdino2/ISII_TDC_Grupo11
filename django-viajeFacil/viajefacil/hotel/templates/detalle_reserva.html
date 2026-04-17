@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% load static %}
+
+
+{% block title %}Factura de Reserva{% endblock %}
+
+
+{% block content %}
+<div style="background-color: #c8efc1;" class="container mt-4 mb-4 border-5 rounded-4">
+
+    <div class="row p-4">
+        <div class="row">
+            <div class="col-8">
+                <h2 class="fs-1">Reservación N° 000-{{ reserva.nro_reserva }}</h2>
+                <p class="fs-3">
+                    Emitida el {{ reserva.fecha_reserva }}
+                </p>
+                <hr class="border border-5 border-success rounded-4">
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-6">
+                <h4 class="fs-2">Datos del Viajero</h4>
+                <p class="fs-4"><strong>Identificación:</strong> {{ viajero.identificacion_viajero }}
+                    <strong>Nombre:</strong> {{ viajero.nombre_completo }}
+                </p class="fs-4">
+                <p class="fs-4"><strong>Dirección:</strong> {{ viajero.direccion_viajero }}</p>
+                <p class="fs-4">
+                    <strong class="fs-4">Email:</strong> {{ viajero.email_viajero }}
+                </p>
+                <p class="fs-4">
+                    <strong class="fs-4">Teléfono:</strong> {{ viajero.telefono_viajero }}
+                </p>
+            </div>
+            <div class="col-6">
+                <h4 class="fs-2">Detalles de la Reserva</h4>
+                <p class="fs-4"><strong>Hotel:</strong> {{ hotel.nombre_hotel }}</p>
+                <p class="fs-4"><strong>Dirección:</strong> {{ hotel.direccion_hotel }}</p>
+                <p class="fs-4">
+                    <strong>Estado:</strong> {{ reserva.estado }}
+                    <strong>Noches:</strong> {{ reserva.noches }}
+                </p class="fs-4">
+                <p class="fs-4"><strong>Check-in:</strong> {{ reserva.checkin }} | <strong>Check-out:</strong> {{ reserva.checkout }}</p>
+            </div>
+        </div>
+        <hr class="border border-5 border-success rounded-4">
+
+        <div class="row">
+            <div class="col-12 mb-3">
+                <h4 class="fs-2">Habitaciones</h4>
+            </div>
+        </div>
+
+        <table class="factura-table fs-5 ms-5">
+            <thead>
+                <tr>
+                    <th>Categoría</th>
+                    <th>Cantidad</th>
+                    <th>Precio por noche</th>
+                    <th>Cantidad de noches</th>
+                    <th>Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for detalle in detalle %}
+                <tr>
+                    <td>{{ detalle.categoria }}</td>
+                    <td>{{ detalle.cantidad_habitaciones }}</td>
+                    <td class="text-right">${{ detalle.precio_unitario|floatformat:0|intcomma }}</td>
+                    <td>{{ reserva.noches }}</td>
+                    <td class="text-right">${{ detalle.sub_total|floatformat:0|intcomma }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                
+                <tr class="factura-totales">
+                    <td colspan="4" class="fw-bold">Subtotal</td>
+                    <td class="fw-bold">${{ subtotal|floatformat:0|intcomma }}</td>
+                </tr>
+                <tr class="factura-totales">
+                    <td colspan="4" class="fw-bold">Impuestos (21%)</td>
+                    <td class="fw-bold">${{ impuestos|floatformat:0|intcomma }}</td>
+                </tr>
+                <tr class="factura-totales">
+                    <td colspan="4" class="fw-bold">Cargos (5%)</td>
+                    <td class="fw-bold">${{ cargos|floatformat:0|intcomma }}</td>
+                </tr>
+                <tr class="factura-totales">
+                     <hr class="border border-5 border-success rounded-4">
+                    <td colspan="4" class="fw-bold">Total</td>
+                    <td class="fw-bold">${{ reserva.monto_total_reserva|floatformat:0|intcomma }}</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+
+
+{% endblock %}

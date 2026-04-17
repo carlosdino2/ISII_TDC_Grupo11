@@ -1,0 +1,113 @@
+.container-search-section{
+    background-color: #004d00;
+    padding: 40px;
+}
+
+.search-section h1 {
+    font-size: 36px;
+    color: white;
+}
+
+.search-section p {
+    color: white;
+}
+
+.search-form {
+    margin-top: 20px;
+}
+
+.search-form input, .search-form .btn {
+    padding: 10px;
+    font-size: 16px;
+    flex: 1 1 150px;
+}
+
+.search-form .btn {
+    background-color: #66bb6a;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.autocomplete-container {
+    position: relative;
+    width: 100%;
+}
+
+#destino {
+    width: 100%;
+    box-sizing: border-box; /* Fundamental para que no cambie de tamaño */
+    background-color: #ffffff; /* mismo fondo blanco que el input */
+    border: 1px solid #ccc;
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 5px;
+}
+
+.sugerencias {
+    color: #333;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: #ffffff;
+    border: 1px solid #ccc;
+    border-top: none;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 100;
+    border-radius: 0 0 5px 5px;
+}
+
+.sugerencia-item {
+    padding: 10px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.sugerencia-item:hover {
+    background-color: #d1ffd1;
+}
+
+.container-popular-destinations{
+    padding: 40px;
+}
+
+.popular-destinations h2 {
+    font-size: 28px;
+    color: #333;
+}
+
+.destinations-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-top: 20px;
+    justify-content: center;
+}
+
+.destination {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    overflow: hidden;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.destination img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.dest-title {
+    position: absolute;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    color: white;
+    width: 100%;
+    text-align: center;
+    padding: 5px;
+}

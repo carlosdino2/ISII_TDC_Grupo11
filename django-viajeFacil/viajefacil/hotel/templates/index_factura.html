@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% load static %}
+
+
+{% block title %}Factura de Reserva{% endblock %}
+
+{% block css %}
+<style>
+    .factura-container {
+        max-width: 900px;
+        margin: auto;
+        padding: 2rem;
+        background: #fff;
+        border: 1px solid #ccc;
+        border-radius: 1rem;
+        font-family: 'Segoe UI', sans-serif;
+    }
+    .factura-boton {
+    padding: 0 2rem;
+    font-family: 'Segoe UI', sans-serif;
+    }
+
+    .factura-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .factura-header h2 {
+        margin: 0;
+    }
+
+    .factura-section {
+        margin-bottom: 1.5rem;
+    }
+
+    .factura-section h4 {
+        border-bottom: 5px solid #198754;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .factura-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .factura-table th, .factura-table td {
+        border: none;
+
+        padding: 0.75rem;
+        text-align: left;
+    }
+
+    .factura-totales td {
+        font-weight: bold;
+    }
+
+    .text-right {
+        text-align: right;
+    }
+
+  @media print {
+    /* Oculta el navbar y footer */
+    nav, footer, .d-print-none, button {
+      display: none !important;
+    }
+
+    /* Margen mínimo en la hoja */
+    @page {
+      margin: 10mm;
+    }
+
+    body {
+      margin: 0;
+      font-size: 9pt;
+    }
+
+    .factura {
+      page-break-inside: avoid;
+    }
+  }
+
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="factura-boton d-flex justify-content-center mt-3 mb-3">
+    <button class="btn btn-success" onclick="window.print()">
+        🖨️ Imprimir o guardar PDF
+    </button>
+</div>
+
+<div class="factura-container border border-5 border-success mb-5">
+    <div class="factura-header">
+        <h2>Factura de Reserva</h2>
+        <p>N° 000-{{ reserva.nro_reserva }}</p>
+        <small>Emitida el {{ reserva.fecha_reserva }}</small>
+    </div>
+
+    <div class="factura-section">
+        <h4>Datos del Viajero</h4>
+        <p><strong>Identificación:</strong> {{ viajero.identificacion_viajero }}
+        <strong>Nombre:</strong> {{ viajero.nombre_completo }}</p>
+        <p><strong>Dirección:</strong> {{ viajero.direccion_viajero }}</p>
+        <strong>Email:</strong> {{ viajero.email_viajero }}
+        <strong>Teléfono:</strong> {{ viajero.telefono_viajero }}</p>
+    </div>
+
+    <div class="factura-section">
+        <h4>Detalles de la Reserva</h4>
+        <p><strong>Hotel:</strong> {{ hotel.nombre_hotel }}</p>
+        <p><strong>Dirección:</strong> {{ hotel.direccion_hotel }}</p>
+        <p>
+            <strong>Estado:</strong> {{ reserva.estado }}
+            <strong>Noches:</strong> {{ reserva.noches }}
+        </p>
+        <p><strong>Check-in:</strong> {{ reserva.checkin }} | <strong>Check-out:</strong> {{ reserva.checkout }}</p>
+    </div>
+
+    <div class="factura-section">
+        <h4>Habitaciones</h4>
+        <table class="factura-table">
+            <thead>
+                <tr>
+                    <th>Categoría</th>
+                    <th>Cantidad</th>
+                    <th>Precio por noche</th>
+                    <th>Cantidad de noches</th>
+                    <th>Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for detalle in detalle %}
+                <tr>
+                    <td>{{ detalle.categoria }}</td>
+                    <td>{{ detalle.cantidad_habitaciones }}</td>
+                    <td class="text-right">${{ detalle.precio_unitario|floatformat:0|intcomma }}</td>
+                    <td class="text-right"> {{ reserva.noches }}</td>
+                    <td class="text-right">${{ detalle.sub_total|floatformat:0|intcomma }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr class="factura-totales">
+                    <td colspan="4" class="text-right">Subtotal</td>
+                    <td class="text-right">${{ subtotal|floatformat:0|intcomma }}</td>
+                </tr>
+                <tr class="factura-totales">
+                    <td colspan="4" class="text-right">Impuestos (21%)</td>
+                    <td class="text-right">${{ impuestos|floatformat:0|intcomma }}</td>
+                </tr>
+                <tr class="factura-totales">
+                    <td colspan="4" class="text-right">Cargos (5%)</td>
+                    <td class="text-right">${{ cargos|floatformat:0|intcomma }}</td>
+                </tr>
+                <tr class="factura-totales">
+                    <td colspan="4" class="text-right">Total</td>
+                    <td class="text-right">${{ reserva.monto_total_reserva|floatformat:0|intcomma }}</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+
+
+
+{% endblock %}
