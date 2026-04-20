@@ -17,8 +17,21 @@
                 <div class="container p-3 pt-1">
                     <form id="form-buscador" class="row gx-2 gy-3 align-items-end" method="get"
                         action="{% url 'hotel:hoteles_por_destino' %}">
-                        <!-- Destino  -->
-                        <div class="col-12 col-md-5 position-relative">
+                        <!-- Origen- Conectar con la BDD -->
+                        <div class="col-12 col-md-3 position-relative">
+                            <div class="position-relative">
+                                <input type="text" id="origen" class="form-control" placeholder="Elija un origen"
+                                    autocomplete="off">
+                                <input type="hidden" id="origen_tipo" name="tipo_origen">
+                                <input type="hidden" id="origen_id" name="id_origen">
+
+                                <div id="sugerencias" class="list-group position-absolute w-100" style="z-index: 1000;">
+                                </div>
+                            </div>
+
+                        </div>
+                        <!-- Destino - Conectar con la BDD  -->
+                        <div class="col-12 col-md-3 position-relative">
                             <div class="position-relative">
                                 <input type="text" id="destino" class="form-control" placeholder="Elija un destino"
                                     autocomplete="off">
@@ -28,37 +41,32 @@
                                 <div id="sugerencias" class="list-group position-absolute w-100" style="z-index: 1000;">
                                 </div>
                             </div>
-
                         </div>
-
-                        <!-- Fecha entrada  -->
+                        <!-- Fecha de ida  -->
                         <div class="col-6 col-md-2">
                             <input type="date" id="fecha_entrada" class="form-control" placeholder="Fecha Entrada" name="fecha_ingreso">
                         </div>
 
-                        <!-- Fecha salida  -->
-                        <div class="col-6 col-md-2">
-                            <input type="date" id="fecha_salida" class="form-control" placeholder="Fecha Salida" name="fecha_salida">
-                        </div>
-
-                        <!-- Personas -->
-                        <div class="col-6 col-md-1 position-relative">
+                        <!-- Cantidad de Personas -->
+                        <div class="col-6 col-md-2 position-relative">
                             <i
                                 class="bi bi-person-fill position-absolute top-50 start-0 translate-middle-y ms-2 text-muted fs-5"></i>
                             <input onkeydown="return false;" type="number" class="form-control ps-4" placeholder="2"
                                 min="1" max="6" name="cantidad_personas">
                         </div>
 
-                        <!-- Habitaciones -->
-                        <div class="col-6 col-md-1 position-relative">
-                            <i
-                                class="fa-solid fa-bed position-absolute top-50 start-0 translate-middle-y ms-2 text-muted fs-6"></i>
-                            <input onkeydown="return false;" type="number" class="form-control ps-4" placeholder="1"
-                                min="1" max="6" name="cantidad_habitaciones">
+                        <!-- Seleccion de clases- conectar con la BDD -->
+                        <div class="col-12 col-md-2">
+                            <select id="clase_vuelo" name="clase_vuelo" class="form-select">
+                                <option value="" selected disabled>Clase</option>
+                                <option value="economica">Económica</option>
+                                <option value="business">Business</option>
+                                <option value="first">Primera Clase</option>
+                            </select>
                         </div>
 
                         <!-- Botón  -->
-                        <div class="col-1 col-md-1">
+                        <div class="col-12 mt-3">
                             <button type="submit" class="btn btn-success w-100">Buscar</button>
                         </div>
                     </form>
