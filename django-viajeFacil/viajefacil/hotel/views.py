@@ -15,6 +15,39 @@ from .utils import obtenerHoteles,buscarHotel,mostrarHabitacionesHotel,mostrarSe
 from .utils import verificarOCrearDireccion,ingresarDatos,insertarCabeceraReservaHotel,insertarDetalleReservaHotel,generarFactura,obtenerReservas
 from .utils import cancelarReserva,generarComprobanteCancelacion
 
+def index_lista_vuelos(request):
+    # Vuelo de prueba
+    vuelos = [
+        {
+            'id': 1,
+            'origen': 'Corrientes',
+            'destino': 'Buenos Aires',
+            'fecha': '2026-06-15',
+            'clase': 'Económica',
+            'precio': 1200,
+            'aerolinea': 'Aerolineas Argentina',
+            'cantidad_asiento_disp': 12,
+            'duracion': 120,
+            'hora_salida': '18:00'
+        },
+        {
+            'id': 2,
+            'origen': 'Resistencia',
+            'destino': 'Entre Rios',
+            'fecha': '2026-07-01',
+            'clase': 'Business',
+            'precio': 2500,
+            'aerolinea': 'Aerolineas Argentina',
+            'cantidad_asiento_disp': 20,
+            'duracion': 240,
+            'hora_salida': '6:00'
+        }
+    ]
+    return render(request, 'lista_vuelos.html', {'vuelos': vuelos})
+
+def index_lista_vuelos2(request):
+    return render(request,'lista_vuelos.html')
+
 def index_vuelos(request):
     return render(request,'index_vuelos.html')
 
