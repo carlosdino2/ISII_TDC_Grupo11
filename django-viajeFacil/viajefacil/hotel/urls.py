@@ -24,6 +24,6 @@ urlpatterns = [
     path('comprobante-cancelacion/', views.generar_comprobante_cancelacion, name='generar_comprobante_cancelacion'),
     #Fin modulo.
     #Modulo 2026: busqueda de vuelos - Aplicar filtros -  Reserva de vuelo - Pago de reserva
-    path('vuelos/', views.index_vuelos, name='index_vuelos')
-    
+    path('vuelos/', views.index_vuelos, name='index_vuelos'),
+    path('lista_vuelos/', views.index_lista_vuelos , name='index_lista_vuelos')
 ]
