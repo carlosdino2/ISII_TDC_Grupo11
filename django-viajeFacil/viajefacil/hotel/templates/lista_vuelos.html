@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %} Viaje Fácil {% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/lista_hoteles.css' %}">
+<link rel="stylesheet" href="{% static 'css/lista_vuelos.css' %}">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+{% endblock %}
+
+{% block content %}
+
+<!--Buscador-->
+<div class="row justify-content-center">
+    <div class="col-8 p-3">
+        {% include 'buscador-vuelo.html' %}
+    </div>
+</div>
+
+<!--Encabezado-->
+<div class="row justify-content-center text-center pt-3">
+    <div class="col-6">
+        <h1>Vuelos Disponibles</h1>
+    </div>
+    <div class="col-3">
+        <div class="dropdown">
+            <button class="btn btn-success btn-lg dropdown-toggle" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false">
+                Ordenar por
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#">Precio: menor a mayor</a></li>
+                <li><a class="dropdown-item" href="#">Precio: mayor a menor</a></li>
+                <li><a class="dropdown-item" href="#">Más elegidos</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-10">
+        {% if vuelos %}
+        {% for vuelo in vuelos %}
+        <div class="card mb-3">
+            <div class="card-body fs-4 row">
+                <div class="col-8">
+                    <h5 class="card-title fs-3 fw-bold text-center">
+                        {{ vuelo.origen }} → {{ vuelo.destino }}
+                    </h5>
+                    <p class="card-text ">
+                        {{ vuelo.aerolinea }}<br>
+                        <i
+                                class="bi bi-person-fill  text-primary "></i>
+                        {{ vuelo.cantidad_asiento_disp }}<br> 
+                        Fecha: {{ vuelo.fecha }} <br>
+                        Hora: {{ vuelo.hora_salida }} / Duración {{ vuelo.duracion }}<br>
+                        Clase: {{ vuelo.clase }} <br>
+                    </p>
+                </div>
+                <div class="col-4 d-flex flex-column align-items-center justify-content-center">
+                    <h3>${{ vuelo.precio }}</h3>
+                    <a href="" class="btn btn-success btn-lg mt-2">Comprar</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+            <div class="alert alert-warning fs-3 text-center">
+                No se encontraron vuelos disponibles para la búsqueda realizada
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}
+
