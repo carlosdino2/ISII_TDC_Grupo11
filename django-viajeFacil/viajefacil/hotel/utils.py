@@ -1,6 +1,12 @@
 from django.db import connection
 from django.db import connection, DatabaseError
 
+def buscarVueloDisponible(id_origen, id_destino, fecha, pasajeros, clase):
+    with connection.cursor() as cursor:
+        cursor.execute("EXEC buscarVueloDisponible %s, %s, %s, %s, %s", 
+                               [id_origen, id_destino, fecha, pasajeros, clase])
+        columnas = [col[0] for col in cursor.description]
+        return [dict(zip(columnas, fila)) for fila in cursor.fetchall()]
 
 def obtenerHoteles():
     with connection.cursor() as cursor:

@@ -7,7 +7,7 @@ urlpatterns = [
     #Modulo 2025: Alojamientos - Hoteles - Habitaciones - Reservas - ETC...
     path('alojamientos/', views.index_alojamientos, name='buscar_alojamientos'),
     path('lista_hoteles/', views.lista_hoteles, name='lista_hoteles'),
-    path('api/destinos/', views.obtener_destinos, name='api_destinos'),  
+    #path('api/destinos/', views.obtener_destinos, name='api_destinos'),  
     path('ajax/buscar-destinos/', views.buscar_destinos, name='ajax_buscar_destinos'),
     path('alojamientos/por-destino/', views.hoteles_por_destino, name='hoteles_por_destino'),
     path('detalle/<int:id>/', views.detalle_hotel, name='detalle_hotel'),
@@ -25,5 +25,7 @@ urlpatterns = [
     #Fin modulo.
     #Modulo 2026: busqueda de vuelos - Aplicar filtros -  Reserva de vuelo - Pago de reserva
     path('vuelos/', views.index_vuelos, name='index_vuelos'),
-    path('lista_vuelos/', views.index_lista_vuelos , name='index_lista_vuelos')
+    path('api/destinos/', views.obtener_destinos_vuelos, name='api_destinos'),
+    path('vuelos-disponibles/', views.vuelos_disponibles, name='vuelos_disponibles'),
+    
 ]

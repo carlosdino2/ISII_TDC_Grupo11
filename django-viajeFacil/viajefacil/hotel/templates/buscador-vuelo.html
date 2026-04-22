@@ -1,175 +1,125 @@
 {% load static %}
 
 {% block css %}
-
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
 {% endblock %}
 
 {% block content %}
 <div class="container-search-section">
-    <div style="background-color: #063970;" class="container rounded-4">
-        <section class="search-section text-white py-4">
-            <div class="search-form">
-                <h1 class="fs-1 px-3 mb-3">Encuentra tu próximo destino</h1>
-                <p class="px-3 h4 mb-4">Busca ofertas de hoteles, vuelos y mucho más...</p>
-                <div class="container p-3 pt-1">
-                    <form id="form-buscador" class="row gx-2 gy-3 align-items-end" method="get"
-                        action="{% url 'hotel:hoteles_por_destino' %}">
-                        <!-- Origen- Conectar con la BDD -->
-                        <div class="col-12 col-md-3 position-relative">
-                            <div class="position-relative">
-                                <input type="text" id="origen" class="form-control" placeholder="Elija un origen"
-                                    autocomplete="off">
-                                <input type="hidden" id="origen_tipo" name="tipo_origen">
-                                <input type="hidden" id="origen_id" name="id_origen">
-
-                                <div id="sugerencias" class="list-group position-absolute w-100" style="z-index: 1000;">
-                                </div>
-                            </div>
-
-                        </div>
-                        <!-- Destino - Conectar con la BDD  -->
-                        <div class="col-12 col-md-3 position-relative">
-                            <div class="position-relative">
-                                <input type="text" id="destino" class="form-control" placeholder="Elija un destino"
-                                    autocomplete="off">
-                                <input type="hidden" id="destino_tipo" name="tipo">
-                                <input type="hidden" id="destino_id" name="id">
-
-                                <div id="sugerencias" class="list-group position-absolute w-100" style="z-index: 1000;">
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Fecha de ida  -->
-                        <div class="col-6 col-md-2">
-                            <input type="date" id="fecha_entrada" class="form-control" placeholder="Fecha Entrada" name="fecha_ingreso">
-                        </div>
-
-                        <!-- Cantidad de Personas -->
-                        <div class="col-6 col-md-2 position-relative">
-                            <i
-                                class="bi bi-person-fill position-absolute top-50 start-0 translate-middle-y ms-2 text-muted fs-5"></i>
-                            <input onkeydown="return false;" type="number" class="form-control ps-4" placeholder="2"
-                                min="1" max="6" name="cantidad_personas">
-                        </div>
-
-                        <!-- Seleccion de clases- conectar con la BDD -->
-                        <div class="col-12 col-md-2">
-                            <select id="clase_vuelo" name="clase_vuelo" class="form-select">
-                                <option value="" selected disabled>Clase</option>
-                                <option value="economica">Económica</option>
-                                <option value="business">Business</option>
-                                <option value="first">Primera Clase</option>
-                            </select>
-                        </div>
-
-                        <!-- Botón  -->
-                        <div class="col-12 mt-3">
-                            <button type="submit" class="btn btn-success w-100">Buscar</button>
-                        </div>
-                    </form>
+    <div style="background-color: #0d3b66;" class="container rounded-4">
+        <div class="search-form py-4">
+            <p class="display-4 px-3 mb-2 text-white">Encuentra tu próximo destino</p>
+            <p class="px-3 h3 mb-4 text-white"><em>¡Busca las mejores ofertas de vuelos!</em></p>
+            
+            <form id="form-buscador" class="row gx-2 gy-3 align-items-end px-3" method="get"
+                action="{% url 'hotel:vuelos_disponibles' %}">
+                
+                <div class="col-12 col-md-3 position-relative">
+                    <label class="text-white-50 small mb-1">Origen</label>
+                    <input type="text" id="origen" class="form-control" placeholder="Elija un origen" autocomplete="off">
+                    <input type="hidden" id="origen_tipo" name="tipo_origen">
+                    <input type="hidden" id="origen_id" name="id_origen">
+                    <div id="sugerencias_origen" class="list-group position-absolute w-100" style="z-index: 1000;"></div>
                 </div>
-            </div>
-        </section>
+
+                <div class="col-12 col-md-3 position-relative">
+                    <label class="text-white-50 small mb-1">Destino</label>
+                    <input type="text" id="destino" class="form-control" placeholder="Elija un destino" autocomplete="off">
+                    <input type="hidden" id="destino_tipo" name="tipo">
+                    <input type="hidden" id="destino_id" name="id">
+                    <div id="sugerencias_destino" class="list-group position-absolute w-100" style="z-index: 1000;"></div>
+                </div>
+
+                <div class="col-6 col-md-2">
+                    <label class="text-white-50 small mb-1">Fecha de salida</label>
+                    <input type="date" id="fecha_entrada" class="form-control" name="fecha_ingreso">
+                </div>
+
+                <div class="col-4 col-md-2">
+                    <label class="text-white-50 small mb-1">Pasajeros</label>
+                    <div class="position-relative">
+                        <i class="bi bi-person-fill position-absolute top-50 start-0 translate-middle-y ms-2 text-muted"></i>
+                        <input onkeydown="return false;" type="number" class="form-control ps-4" 
+                               value="1" min="1" max="6" name="cantidad_personas">
+                    </div>
+                </div>
+
+                <div class="col-4 col-md-2">
+                    <label class="text-white-50 small mb-1">Clase</label>
+                    <select id="clase_vuelo" name="clase_vuelo" class="form-select bg-white text-dark">
+                        <option value="1" selected>Económica</option>
+                        <option value="2">Ejecutiva</option>
+                        <option value="3">Primera Clase</option>
+                    </select>
+                </div>
+
+                <div class="col-12 mt-3">
+                    <button type="submit" class="btn w-100 text-dark fw-bold" style="background-color: #faf0ca;">
+                        <i class="bi bi-search me-2"></i>Buscar vuelos
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
-
 {% endblock %}
 
 {% block script %}
 <script>
     const DESTINOS_API_URL = "{% url 'hotel:api_destinos' %}";
-</script>
-<script src="{% static 'js/index_alojamientos.js' %}"></script>
 
-<!--Verificacion de la fecha-->
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const hoy = new Date().toISOString().split("T")[0]; // formato YYYY-MM-DD
+    function seleccionar(inputId, sugerenciasId, hiddenId, hiddenTipo, texto, id, tipo) {
+        document.getElementById(inputId).value = texto;
+        document.getElementById(hiddenId).value = id;
+        document.getElementById(hiddenTipo).value = tipo;
+        document.getElementById(sugerenciasId).innerHTML = '';
+    }
 
-        const entrada = document.getElementById("fecha_entrada");
-        const salida = document.getElementById("fecha_salida");
+    function configurarAutocompletar(inputId, sugerenciasId, hiddenId, hiddenTipo) {
+        const input = document.getElementById(inputId);
+        const sugerencias = document.getElementById(sugerenciasId);
 
-        entrada.min = hoy;
-        salida.min = hoy;
-
-        entrada.addEventListener("change", function () {
-            salida.min = entrada.value;
-            if (salida.value < entrada.value) {
-                salida.value = entrada.value;
-            }
-        });
-    });
-
-    document.addEventListener("DOMContentLoaded", function () {
-        const inputDestino = document.getElementById('destino');
-        const sugerencias = document.getElementById('sugerencias');
-        const inputTipo = document.getElementById('destino_tipo');
-        const inputId = document.getElementById('destino_id');
-
-        inputDestino.addEventListener('input', function () {
-            const query = this.value;
-
+        input.addEventListener('input', async () => {
+            const query = input.value.trim();
             if (query.length < 2) {
                 sugerencias.innerHTML = '';
                 return;
             }
 
-            fetch(`/hotel/ajax/buscar-destinos/?term=${encodeURIComponent(query)}`)
-                .then(res => res.json())
-                .then(data => {
-                    sugerencias.innerHTML = '';
-                    data.forEach(dest => {
-                        const item = document.createElement('button');
-                        item.className = 'list-group-item list-group-item-action';
-                        item.textContent = dest.destino;
-                        item.type = 'button';
-                        item.onclick = () => {
-                            inputDestino.value = dest.destino;
-                            inputTipo.value = dest.tipo;
-                            inputId.value = dest.id;
-                            sugerencias.innerHTML = '';
-                        };
-                        sugerencias.appendChild(item);
-                    });
-                });
-        });
+            const response = await fetch(`${DESTINOS_API_URL}?term=${query}`);
+            const datos = await response.json();
 
-        document.addEventListener('click', function (e) {
-            if (!sugerencias.contains(e.target) && e.target !== inputDestino) {
-                sugerencias.innerHTML = '';
+            sugerencias.innerHTML = datos.map(item => `
+                <button type="button" class="list-group-item list-group-item-action" 
+                    onclick="seleccionar('${inputId}', '${sugerenciasId}', '${hiddenId}', '${hiddenTipo}', '${item.destino}', '${item.id}', '${item.tipo}')">
+                    ${item.destino}
+                </button>
+            `).join('');
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        // 1. Configuración de Fechas (Min hoy)
+        const hoy = new Date().toISOString().split("T")[0];
+        const entrada = document.getElementById("fecha_entrada");
+        if (entrada) entrada.min = hoy;
+
+        // 2. Inicializar Autocompletados
+        configurarAutocompletar('origen', 'sugerencias_origen', 'origen_id', 'origen_tipo');
+        configurarAutocompletar('destino', 'sugerencias_destino', 'destino_id', 'destino_tipo');
+
+        // 3. Validación de Formulario
+        const form = document.getElementById('form-buscador');
+        form.addEventListener('submit', function (e) {
+            const idOrigen = document.getElementById('origen_id').value;
+            const idDestino = document.getElementById('destino_id').value;
+            
+            if (!idOrigen || !idDestino) {
+                e.preventDefault();
+                alert("Por favor, seleccioná el origen y el destino de la lista sugerida.");
             }
         });
     });
-document.querySelector('form').addEventListener('submit', function (e) {
-    const tipo = document.getElementById('destino_tipo').value;
-    const id = document.getElementById('destino_id').value;
-
-    if (!destinoValido) {
-    document.getElementById('id_direccion').value = ''; // Limpiamos el campo oculto
-    }
-    formulario.submit();
-
-});
-
-
-document.addEventListener('DOMContentLoaded', function () {
-    const form = document.getElementById('form-buscador');
-    const destinoInput = document.getElementById('destino');
-
-    form.addEventListener('submit', function (e) {
-        const valorDestino = destinoInput.value.trim();
-        if (!valorDestino) {
-            e.preventDefault(); // evita el envío del formulario
-            alert("Por favor seleccioná un destino válido de la lista");
-        }
-    });
-});
-
-
-
 </script>
-
 {% endblock %}
