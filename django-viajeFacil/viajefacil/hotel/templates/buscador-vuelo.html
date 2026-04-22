@@ -8,59 +8,64 @@
 {% block content %}
 <div class="container-search-section">
     <div style="background-color: #0d3b66;" class="container rounded-4">
-        <div class="search-form py-4">
-            <p class="display-4 px-3 mb-2 text-white">Encuentra tu próximo destino</p>
-            <p class="px-3 h3 mb-4 text-white"><em>¡Busca las mejores ofertas de vuelos!</em></p>
-            
-            <form id="form-buscador" class="row gx-2 gy-3 align-items-end px-3" method="get"
-                action="{% url 'hotel:vuelos_disponibles' %}">
-                
-                <div class="col-12 col-md-3 position-relative">
-                    <label class="text-white-50 small mb-1">Origen</label>
-                    <input type="text" id="origen" class="form-control" placeholder="Elija un origen" autocomplete="off">
-                    <input type="hidden" id="origen_tipo" name="tipo_origen">
-                    <input type="hidden" id="origen_id" name="id_origen">
-                    <div id="sugerencias_origen" class="list-group position-absolute w-100" style="z-index: 1000;"></div>
+        <div class="search-form  text-white pt-4">
+            <div class="row px-3">
+                <div class="col-12">
+                    <p class="display-4 mb-2">Encuentra tu próximo destino</p>
+                    <p class="h3 mb-4 text-muted-custom"><em>¡Busca las mejores ofertas de vuelos!</em></p>
                 </div>
-
-                <div class="col-12 col-md-3 position-relative">
-                    <label class="text-white-50 small mb-1">Destino</label>
-                    <input type="text" id="destino" class="form-control" placeholder="Elija un destino" autocomplete="off">
-                    <input type="hidden" id="destino_tipo" name="tipo">
-                    <input type="hidden" id="destino_id" name="id">
-                    <div id="sugerencias_destino" class="list-group position-absolute w-100" style="z-index: 1000;"></div>
-                </div>
-
-                <div class="col-6 col-md-2">
-                    <label class="text-white-50 small mb-1">Fecha de salida</label>
-                    <input type="date" id="fecha_entrada" class="form-control" name="fecha_ingreso">
-                </div>
-
-                <div class="col-4 col-md-2">
-                    <label class="text-white-50 small mb-1">Pasajeros</label>
-                    <div class="position-relative">
-                        <i class="bi bi-person-fill position-absolute top-50 start-0 translate-middle-y ms-2 text-muted"></i>
-                        <input onkeydown="return false;" type="number" class="form-control ps-4" 
-                               value="1" min="1" max="6" name="cantidad_personas">
-                    </div>
-                </div>
-
-                <div class="col-4 col-md-2">
-                    <label class="text-white-50 small mb-1">Clase</label>
-                    <select id="clase_vuelo" name="clase_vuelo" class="form-select bg-white text-dark">
-                        <option value="1" selected>Económica</option>
-                        <option value="2">Ejecutiva</option>
-                        <option value="3">Primera Clase</option>
-                    </select>
-                </div>
-
-                <div class="col-12 mt-3">
-                    <button type="submit" class="btn w-100 text-dark fw-bold" style="background-color: #faf0ca;">
-                        <i class="bi bi-search me-2"></i>Buscar vuelos
-                    </button>
-                </div>
-            </form>
+            </div>
         </div>
+
+        <form id="form-buscador" class="row gx-2 gy-3 align-items-end px-3" method="get"
+            action="{% url 'hotel:vuelos_disponibles' %}">
+
+            <div class="col-12 col-md-3 position-relative">
+                <label class="text-white-50 small mb-1">Origen</label>
+                <input type="text" id="origen" class="form-control" placeholder="Elija un origen" autocomplete="off">
+                <input type="hidden" id="origen_tipo" name="tipo_origen">
+                <input type="hidden" id="origen_id" name="id_origen">
+                <div id="sugerencias_origen" class="list-group position-absolute w-100" style="z-index: 1000;"></div>
+            </div>
+
+            <div class="col-12 col-md-3 position-relative">
+                <label class="text-white-50 small mb-1">Destino</label>
+                <input type="text" id="destino" class="form-control" placeholder="Elija un destino" autocomplete="off">
+                <input type="hidden" id="destino_tipo" name="tipo">
+                <input type="hidden" id="destino_id" name="id">
+                <div id="sugerencias_destino" class="list-group position-absolute w-100" style="z-index: 1000;"></div>
+            </div>
+
+            <div class="col-6 col-md-2">
+                <label class="text-white-50 small mb-1">Fecha de salida</label>
+                <input type="date" id="fecha_entrada" class="form-control" name="fecha_ingreso">
+            </div>
+
+            <div class="col-4 col-md-2">
+                <label class="text-white-50 small mb-1">Pasajeros</label>
+                <div class="position-relative">
+                    <i
+                        class="bi bi-person-fill position-absolute top-50 start-0 translate-middle-y ms-2 text-muted"></i>
+                    <input onkeydown="return false;" type="number" class="form-control ps-4" value="1" min="1" max="6"
+                        name="cantidad_personas">
+                </div>
+            </div>
+
+            <div class="col-4 col-md-2">
+                <label class="text-white-50 small mb-1">Clase</label>
+                <select id="clase_vuelo" name="clase_vuelo" class="form-select bg-white text-dark">
+                    <option value="1" selected>Económica</option>
+                    <option value="2">Ejecutiva</option>
+                    <option value="3">Primera Clase</option>
+                </select>
+            </div>
+
+            <div class="col-12 mt-3 pb-4">
+                <button type="submit" class="btn w-100 text-dark fw-bold" style="background-color: #faf0ca;">
+                    <i class="bi bi-search me-2"></i>Buscar vuelos
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 {% endblock %}
@@ -109,15 +114,41 @@
         configurarAutocompletar('origen', 'sugerencias_origen', 'origen_id', 'origen_tipo');
         configurarAutocompletar('destino', 'sugerencias_destino', 'destino_id', 'destino_tipo');
 
-        // 3. Validación de Formulario
+        // 3. Validación de Formulario 
         const form = document.getElementById('form-buscador');
         form.addEventListener('submit', function (e) {
             const idOrigen = document.getElementById('origen_id').value;
             const idDestino = document.getElementById('destino_id').value;
-            
+            const fechaInput = document.getElementById('fecha_entrada');
+            const fechaVal = fechaInput.value;
+
+            // Validación 1: Origen y Destino vacíos o no seleccionados de la lista
             if (!idOrigen || !idDestino) {
                 e.preventDefault();
                 alert("Por favor, seleccioná el origen y el destino de la lista sugerida.");
+                return;
+            }
+
+            // Validación 2: Origen y Destino no pueden ser iguales
+            if (idOrigen === idDestino) {
+                e.preventDefault();
+                alert("El origen y destino no pueden ser los mismos.");
+                return;
+            }
+
+            // Validación 3: Fecha vacía
+            if (!fechaVal) {
+                e.preventDefault();
+                alert("Por favor, seleccione una fecha de salida.");
+                return;
+            }
+
+            // Validación 4: Formato de fecha (evitar caracteres no válidos)
+            const regexFecha = /^\d{4}-\d{2}-\d{2}$/;
+            if (!regexFecha.test(fechaVal)) {
+                e.preventDefault();
+                alert("Error en el formato de fecha introducida.");
+                return;
             }
         });
     });

@@ -21,6 +21,25 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from .utils import buscarVueloDisponible
 
+def aplicarFiltrosResultados(lista_vuelos, criterio):
+    if not lista_vuelos:
+        return []
+
+    if criterio == 'barato':
+        # Ordenamos por el campo numérico precio_clase
+        lista_vuelos.sort(key=lambda x: x['precio_unitario_formateado'])
+    
+    elif criterio == 'rapido':
+        # Gracias al cambio en SQL, ahora comparamos minutos (enteros)
+        lista_vuelos.sort(key=lambda x: x['duracion_minutos'])
+    
+    elif criterio == 'recomendado':
+        # Un balance
+        lista_vuelos.sort(key=lambda x: (x['precio_unitario_formateado'], x['duracion_minutos']))
+        
+    return lista_vuelos
+    
+
 def vuelos_disponibles(request):
     # 1. Captura de datos desde el GET
     id_origen = request.GET.get('id_origen')
@@ -31,6 +50,8 @@ def vuelos_disponibles(request):
 
     vuelos_encontrados = []
     error_sql = None
+    # Obtenemos el criterio de la URL, por defecto 'recomendado'
+    criterio_filtro = request.GET.get('orden', 'recomendado')
 
     try:
         if id_origen and id_destino:
@@ -38,6 +59,8 @@ def vuelos_disponibles(request):
             vuelos_encontrados = buscarVueloDisponible(
                 id_origen, id_destino, fecha, pasajeros, clase
             )
+            # APLICAMOS EL FILTRO
+            vuelos_encontrados = aplicarFiltrosResultados(vuelos_encontrados, criterio_filtro)
             
             # 3. PRINT DE CONTROL: Verás esto en la terminal de VS Code/Django
             print("\n" + "="*60)
@@ -49,21 +72,18 @@ def vuelos_disponibles(request):
             else:
                 print("Aviso: El procedimiento no devolvió ningún vuelo.")
             print("="*60 + "\n")
+            
 
     except Exception as e:
         error_sql = str(e)
         print(f"ERROR CRÍTICO EN LA VISTA: {error_sql}")
+        
 
     # 4. Retorno a la vista
     return render(request, 'lista_vuelos.html', {
         'vuelos': vuelos_encontrados,
-        'debug_params': {
-            'origen': id_origen,
-            'destino': id_destino,
-            'fecha': fecha,
-            'pasajeros': pasajeros,
-            'clase': clase
-        },
+        'orden_actual':criterio_filtro,
+        'debug_params': request.GET,
         'error_sql': error_sql
     })
 
