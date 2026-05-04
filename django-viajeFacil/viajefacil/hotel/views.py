@@ -19,8 +19,9 @@ from .models import Localidad
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.shortcuts import render
-from .utils import buscarVueloDisponible
+from .utils import verificarRuta,buscarPorFecha,consultarCupo
 
+#Modulo vuelos
 def aplicarFiltrosResultados(lista_vuelos, criterio):
     if not lista_vuelos:
         return []
@@ -41,49 +42,74 @@ def aplicarFiltrosResultados(lista_vuelos, criterio):
     
 
 def vuelos_disponibles(request):
-    # 1. Captura de datos desde el GET
-    id_origen = request.GET.get('id_origen')
-    id_destino = request.GET.get('id') 
-    fecha = request.GET.get('fecha_ingreso')
-    pasajeros = request.GET.get('cantidad_personas')
-    clase = request.GET.get('clase_vuelo')
+    # --- ETAPA 1: CAPTURA DE PARÁMETROS ---
+    # 1. Captura y conversión de datos (Casteo a INT)
+    try:
+        id_origen = int(request.GET.get('id_origen')) if request.GET.get('id_origen') else None
+        id_destino = int(request.GET.get('id')) if request.GET.get('id') else None 
+        pasajeros = int(request.GET.get('cantidad_personas', 1))
+        clase = int(request.GET.get('clase_vuelo', 1))
+    except ValueError:
+        return render(request, 'error.html', {'mensaje': 'Parámetros numéricos inválidos'})
 
+    fecha = request.GET.get('fecha_ingreso')
+    criterio_filtro = request.GET.get('orden', 'recomendado')
     vuelos_encontrados = []
     error_sql = None
-    # Obtenemos el criterio de la URL, por defecto 'recomendado'
-    criterio_filtro = request.GET.get('orden', 'recomendado')
 
     try:
         if id_origen and id_destino:
-            # 2. Llamada al procedimiento pasando los parámetros capturados
-            vuelos_encontrados = buscarVueloDisponible(
-                id_origen, id_destino, fecha, pasajeros, clase
-            )
-            # APLICAMOS EL FILTRO
+            # --- ETAPA 2: BÚSQUEDA JERÁRQUICA (Ruta -> Fecha -> Cupo) 
+            # 1. ¿Existe la ruta? (Ej: Ctes a Bariloche)
+            rutas = verificarRuta(id_origen, id_destino)
+            print(f"DEBUG 1: Rutas encontradas -> {len(rutas)}")
+
+            if rutas:
+                for vuelo_ruta in rutas:
+                    # 2. Para esta ruta, ¿hay vuelos en esta fecha?
+                    id_vuelo = vuelo_ruta['ID_vuelo']
+                    progs = buscarPorFecha(id_vuelo, fecha)
+                    print(f"DEBUG 2: Programaciones para Vuelo {id_vuelo} -> {len(progs)}") 
+                    
+
+                    for prog in progs:
+                        # 3. Para esta programación, ¿hay asientos disponibles?
+                        id_prog = prog['ID_programacion_vuelo']
+                        cupos = consultarCupo(pasajeros, clase, id_prog)
+                        
+                        # Si cupos tiene datos, significa que hay lugar
+                        if cupos:
+                            print(f"DEBUG 3: ¡Cupo encontrado para Prog {id_prog}!") 
+                            
+                            # --- ETAPA 3: CONSOLIDACIÓN DE DATOS
+                            info_asiento = cupos[0] if isinstance(cupos, list) else cupos
+                            
+                            resultado_final = {
+                                **vuelo_ruta,  # Datos del vuelo y aerolínea
+                                **prog,        # Fechas y horas
+                                'tipo_clase':info_asiento.get('descripcion_clase'),
+                                'precio_unitario': info_asiento.get('precio_unitario_formateado'),
+                                'precio_total':info_asiento.get('precio_total_formateado'),
+                                'asientos_libres': info_asiento.get('asiento_disponible_clase'),
+                                'cupo_info': info_asiento
+                            }
+                            vuelos_encontrados.append(resultado_final)
+
+            # Aplicación de filtros finales
             vuelos_encontrados = aplicarFiltrosResultados(vuelos_encontrados, criterio_filtro)
-            
-            # 3. PRINT DE CONTROL: Verás esto en la terminal de VS Code/Django
+
+            # PRINT DE CONTROL FINAL
             print("\n" + "="*60)
-            print(f"DEBUG: RESULTADOS DEL PROCEDIMIENTO PARA {fecha}")
-            if vuelos_encontrados:
-                # Imprime la lista completa de diccionarios para ver los nombres de las columnas
-                import json
-                print(json.dumps(vuelos_encontrados, indent=4, default=str))
-            else:
-                print("Aviso: El procedimiento no devolvió ningún vuelo.")
+            print(f"DEBUG FINAL: {len(vuelos_encontrados)} vuelos listos para el front")
             print("="*60 + "\n")
-            
 
     except Exception as e:
         error_sql = str(e)
-        print(f"ERROR CRÍTICO EN LA VISTA: {error_sql}")
-        
+        print(f"ERROR CRÍTICO: {error_sql}")
 
-    # 4. Retorno a la vista
     return render(request, 'lista_vuelos.html', {
         'vuelos': vuelos_encontrados,
-        'orden_actual':criterio_filtro,
-        'debug_params': request.GET,
+        'orden_actual': criterio_filtro,
         'error_sql': error_sql
     })
 

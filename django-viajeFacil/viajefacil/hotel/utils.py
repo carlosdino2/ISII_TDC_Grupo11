@@ -1,13 +1,32 @@
 from django.db import connection
 from django.db import connection, DatabaseError
 
-def buscarVueloDisponible(id_origen, id_destino, fecha, pasajeros, clase):
+#Mod Vuelos----------------------------------------------
+def verificarRuta(origen,destino):
     with connection.cursor() as cursor:
-        cursor.execute("EXEC buscarVueloDisponible %s, %s, %s, %s, %s", 
-                               [id_origen, id_destino, fecha, pasajeros, clase])
+        cursor.execute("EXEC verificarRuta %s, %s", 
+                               [origen, destino])
         columnas = [col[0] for col in cursor.description]
         return [dict(zip(columnas, fila)) for fila in cursor.fetchall()]
 
+def buscarPorFecha(ID_vuelo,fecha_salida):
+    with connection.cursor() as cursor:
+        cursor.execute("EXEC buscarPorFecha %s, %s", 
+                               [ID_vuelo, fecha_salida])
+        columnas = [col[0] for col in cursor.description]
+        return [dict(zip(columnas, fila)) for fila in cursor.fetchall()]
+    
+def consultarCupo(cant, ID_clase, ID_programacion_vuelo):
+    with connection.cursor() as cursor:
+        cursor.execute("EXEC consultarCupo %s, %s, %s", 
+                               [cant, ID_clase,ID_programacion_vuelo])
+        columnas = [col[0] for col in cursor.description]
+        return [dict(zip(columnas, fila)) for fila in cursor.fetchall()]
+
+
+
+
+#Mod Hoteles-------------------------------------------
 def obtenerHoteles():
     with connection.cursor() as cursor:
         cursor.execute("EXEC obtenerHoteles")
