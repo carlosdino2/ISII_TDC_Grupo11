@@ -19,7 +19,7 @@ from .models import Localidad
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.shortcuts import render
-from .utils import verificarRuta,buscarPorFecha,consultarCupo
+from .utils import verificarRuta,buscarPorFecha,consultarCupo,mostrarVuelosDisponibles
 
 #Modulo vuelos
 def aplicarFiltrosResultados(lista_vuelos, criterio):
@@ -28,25 +28,23 @@ def aplicarFiltrosResultados(lista_vuelos, criterio):
 
     if criterio == 'barato':
         # Ordenamos por el campo numérico precio_clase
-        lista_vuelos.sort(key=lambda x: x['precio_unitario_formateado'])
+        lista_vuelos.sort(key=lambda x: x['precio_unitario'])
     
     elif criterio == 'rapido':
-        # Gracias al cambio en SQL, ahora comparamos minutos (enteros)
+        # Ordenamos por la duración de minutos para saber cual es el mas rapido
         lista_vuelos.sort(key=lambda x: x['duracion_minutos'])
     
     elif criterio == 'recomendado':
-        # Un balance
-        lista_vuelos.sort(key=lambda x: (x['precio_unitario_formateado'], x['duracion_minutos']))
+        # Ordenamos según la opción recomendado
+        lista_vuelos.sort(key=lambda x: (x['precio_unitario'], x['duracion_minutos']))
         
     return lista_vuelos
-    
 
 def vuelos_disponibles(request):
-    # --- ETAPA 1: CAPTURA DE PARÁMETROS ---
-    # 1. Captura y conversión de datos (Casteo a INT)
+    # 1. Obtención de datos
     try:
-        id_origen = int(request.GET.get('id_origen')) if request.GET.get('id_origen') else None
-        id_destino = int(request.GET.get('id')) if request.GET.get('id') else None 
+        id_origen = int(request.GET.get('id_origen', 0))
+        id_destino = int(request.GET.get('id', 0))
         pasajeros = int(request.GET.get('cantidad_personas', 1))
         clase = int(request.GET.get('clase_vuelo', 1))
     except ValueError:
@@ -54,64 +52,33 @@ def vuelos_disponibles(request):
 
     fecha = request.GET.get('fecha_ingreso')
     criterio_filtro = request.GET.get('orden', 'recomendado')
-    vuelos_encontrados = []
     error_sql = None
+    vuelos_filtrados = []
 
+    # 2. Validación 
+    if not id_origen or not id_destino or not fecha:
+        return render(request, 'lista_vuelos.html', {'vuelos': [], 'error_sql': "Faltan parámetros de búsqueda"})
+
+    # 3. Logica de la busqueda
     try:
-        if id_origen and id_destino:
-            # --- ETAPA 2: BÚSQUEDA JERÁRQUICA (Ruta -> Fecha -> Cupo) 
-            # 1. ¿Existe la ruta? (Ej: Ctes a Bariloche)
-            rutas = verificarRuta(id_origen, id_destino)
-            print(f"DEBUG 1: Rutas encontradas -> {len(rutas)}")
-
-            if rutas:
-                for vuelo_ruta in rutas:
-                    # 2. Para esta ruta, ¿hay vuelos en esta fecha?
-                    id_vuelo = vuelo_ruta['ID_vuelo']
-                    progs = buscarPorFecha(id_vuelo, fecha)
-                    print(f"DEBUG 2: Programaciones para Vuelo {id_vuelo} -> {len(progs)}") 
-                    
-
-                    for prog in progs:
-                        # 3. Para esta programación, ¿hay asientos disponibles?
-                        id_prog = prog['ID_programacion_vuelo']
-                        cupos = consultarCupo(pasajeros, clase, id_prog)
-                        
-                        # Si cupos tiene datos, significa que hay lugar
-                        if cupos:
-                            print(f"DEBUG 3: ¡Cupo encontrado para Prog {id_prog}!") 
-                            
-                            # --- ETAPA 3: CONSOLIDACIÓN DE DATOS
-                            info_asiento = cupos[0] if isinstance(cupos, list) else cupos
-                            
-                            resultado_final = {
-                                **vuelo_ruta,  # Datos del vuelo y aerolínea
-                                **prog,        # Fechas y horas
-                                'tipo_clase':info_asiento.get('descripcion_clase'),
-                                'precio_unitario': info_asiento.get('precio_unitario_formateado'),
-                                'precio_total':info_asiento.get('precio_total_formateado'),
-                                'asientos_libres': info_asiento.get('asiento_disponible_clase'),
-                                'cupo_info': info_asiento
-                            }
-                            vuelos_encontrados.append(resultado_final)
-
-            # Aplicación de filtros finales
-            vuelos_encontrados = aplicarFiltrosResultados(vuelos_encontrados, criterio_filtro)
-
-            # PRINT DE CONTROL FINAL
-            print("\n" + "="*60)
-            print(f"DEBUG FINAL: {len(vuelos_encontrados)} vuelos listos para el front")
-            print("="*60 + "\n")
+        # Consultamos los vuelos disponibles:
+        vuelos = mostrarVuelosDisponibles(id_origen, id_destino, fecha, pasajeros, clase)
+        
+        # Aplicamos los filtros
+        vuelos_filtrados = aplicarFiltrosResultados(vuelos, criterio_filtro)
 
     except Exception as e:
         error_sql = str(e)
-        print(f"ERROR CRÍTICO: {error_sql}")
+        # Esto mostrará por consola el error exacto si algo falla
+        print(f"ERROR CRÍTICO EN LA BÚSQUEDA: {error_sql}")
 
+    # 4. Retornamos a la interfaz
     return render(request, 'lista_vuelos.html', {
-        'vuelos': vuelos_encontrados,
+        'vuelos': vuelos_filtrados,
         'orden_actual': criterio_filtro,
         'error_sql': error_sql
     })
+
 
 def obtener_destinos_vuelos(request):
     # 1. Obtenemos el término que manda el fetch del JS (?term=...)
@@ -165,6 +132,7 @@ def api_destinos(request):
 def index_vuelos(request):
     return render(request,'index_vuelos.html')
 
+#Modulo hoteles
 def index_alojamientos (request):
     return render (request, 'index_alojamientos.html')
 

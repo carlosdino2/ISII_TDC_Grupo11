@@ -23,6 +23,51 @@ def consultarCupo(cant, ID_clase, ID_programacion_vuelo):
         columnas = [col[0] for col in cursor.description]
         return [dict(zip(columnas, fila)) for fila in cursor.fetchall()]
 
+def mostrarVuelosDisponibles(id_origen, id_destino, fecha, pasajeros, clase):
+
+    vuelos_encontrados = []
+    rutas = verificarRuta(id_origen, id_destino)
+    
+    # Manejo de rutas nulas 
+    cantidad_rutas = len(rutas) if rutas else 0
+    print(f"--1: Rutas encontradas -> {cantidad_rutas}")
+
+    if rutas:
+        for vuelo_ruta in rutas:
+            id_vuelo = vuelo_ruta['ID_vuelo']
+            progs = buscarPorFecha(id_vuelo, fecha)
+            
+            cantidad_progs = len(progs) if progs else 0
+            print(f"--2: Programaciones para Vuelo {id_vuelo} -> {cantidad_progs}") 
+
+            if progs:
+                for prog in progs:
+                    id_prog = prog['ID_programacion_vuelo']
+                    cupos = consultarCupo(pasajeros, clase, id_prog)
+                    
+                    if cupos:
+                        print(f"--3: Cupo encontrado para Prog {id_prog}") 
+                        
+                        # Consolidación de datos
+                        info_asiento = cupos[0] if isinstance(cupos, list) else cupos
+                        
+                        resultado_final = {
+                            **vuelo_ruta,  
+                            **prog,        
+                            'tipo_clase': info_asiento.get('descripcion_clase'),
+                            'precio_unitario': info_asiento.get('precio_unitario'),
+                            'precio_total': info_asiento.get('precio_total_formateado'),
+                            'asientos_libres': info_asiento.get('asiento_disponible_clase'),
+                            'cupo_info': info_asiento
+                        }
+                        vuelos_encontrados.append(resultado_final)
+
+    # PRINT DE CONTROL FINAL
+    print("\n" + "="*60)
+    print(f"FINAL: {len(vuelos_encontrados)} vuelos enviados al front")
+    print("="*60 + "\n")
+
+    return vuelos_encontrados
 
 
 
