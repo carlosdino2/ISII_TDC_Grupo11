@@ -45,18 +45,15 @@ def mostrarVuelosDisponibles(id_origen, id_destino, fecha, pasajeros, clase):
     vuelos_encontrados = []
     #Pedimos las rutas para las localidades ingresadas
     rutas = verificarRuta(id_origen, id_destino)
-    
     # Manejo de rutas nulas 
     cantidad_rutas = len(rutas) if rutas else 0
     print(f"--1: Rutas encontradas -> {cantidad_rutas}")
-
     #Si encontramos rutas entonces empezamos a armar los vuelos:
     if rutas:
         for vuelo_ruta in rutas:
             id_vuelo = vuelo_ruta['ID_vuelo']
             #Si existe la ruta entonces preguntamos si hay programaciones disponibles en las fechas ingresadas por el usuario:
             progs = buscarPorFecha(id_vuelo, fecha)
-            
             cantidad_progs = len(progs) if progs else 0
             print(f"--2: Programaciones para Vuelo {id_vuelo} -> {cantidad_progs}") 
             #Si existen programaciones disponibles entonces preguntamos si existe cupo para la cantidad y clase que ingresó el usuario:
@@ -87,7 +84,6 @@ def mostrarVuelosDisponibles(id_origen, id_destino, fecha, pasajeros, clase):
     print("\n" + "="*60)
     print(f"FINAL: {len(vuelos_encontrados)} vuelos enviados al front")
     print("="*60 + "\n")
-
     return vuelos_encontrados
 
 def vuelos_disponibles(request):
@@ -126,7 +122,6 @@ def vuelos_disponibles(request):
         'orden_actual': criterio_filtro,
         'error_sql': error_sql
     })
-
 
 def obtener_destinos_vuelos(request):
     # 1. Obtenemos el término que manda el fetch del JS (?term=...)
