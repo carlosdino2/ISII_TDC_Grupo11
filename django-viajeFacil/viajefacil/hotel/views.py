@@ -14,10 +14,168 @@ from itertools import combinations_with_replacement
 from .utils import obtenerHoteles,buscarHotel,mostrarHabitacionesHotel,mostrarServiciosHotel,mostrarServiciosCategorias,buscarHotelPorId,ingresarDatos
 from .utils import verificarOCrearDireccion,ingresarDatos,insertarCabeceraReservaHotel,insertarDetalleReservaHotel,generarFactura,obtenerReservas
 from .utils import cancelarReserva,generarComprobanteCancelacion
+from django.http import JsonResponse
+from .models import Localidad
+from django.shortcuts import render
+from django.http import JsonResponse
+from django.shortcuts import render
+from .utils import verificarRuta,buscarPorFecha,consultarCupo
+
+#Modulo vuelos
+def aplicarFiltrosResultados(lista_vuelos, criterio):
+    if not lista_vuelos:
+        return []
+
+    if criterio == 'barato':
+        # Ordenamos por el campo numérico precio_clase
+        lista_vuelos.sort(key=lambda x: x['precio_unitario'])
+    
+    elif criterio == 'rapido':
+        # Ordenamos por la duración de minutos para saber cual es el mas rapido
+        lista_vuelos.sort(key=lambda x: x['duracion_minutos'])
+    
+    elif criterio == 'recomendado':
+        # Ordenamos según la opción recomendado
+        lista_vuelos.sort(key=lambda x: (x['precio_unitario'], x['duracion_minutos']))
+        
+    return lista_vuelos
+
+def mostrarVuelosDisponibles(id_origen, id_destino, fecha, pasajeros, clase):
+    #Creamos nuestra coleccion de vuelos vacía
+    vuelos_encontrados = []
+    #Pedimos las rutas para las localidades ingresadas
+    rutas = verificarRuta(id_origen, id_destino)
+    # Manejo de rutas nulas 
+    cantidad_rutas = len(rutas) if rutas else 0
+    print(f"--1: Rutas encontradas -> {cantidad_rutas}")
+    #Si encontramos rutas entonces empezamos a armar los vuelos:
+    if rutas:
+        for vuelo_ruta in rutas:
+            id_vuelo = vuelo_ruta['ID_vuelo']
+            #Si existe la ruta entonces preguntamos si hay programaciones disponibles en las fechas ingresadas por el usuario:
+            progs = buscarPorFecha(id_vuelo, fecha)
+            cantidad_progs = len(progs) if progs else 0
+            print(f"--2: Programaciones para Vuelo {id_vuelo} -> {cantidad_progs}") 
+            #Si existen programaciones disponibles entonces preguntamos si existe cupo para la cantidad y clase que ingresó el usuario:
+            if progs:
+                for prog in progs:
+                    id_prog = prog['ID_programacion_vuelo']
+                    cupos = consultarCupo(pasajeros, clase, id_prog)
+                    
+                    if cupos:
+                        print(f"--3: Cupo encontrado para Prog {id_prog}") 
+                        
+                        # Consolidación de datos
+                        info_asiento = cupos[0] if isinstance(cupos, list) else cupos
+                        #Armamos los datos para agregar a la lista de vuelos:
+                        resultado_final = {
+                            **vuelo_ruta,  
+                            **prog,        
+                            'tipo_clase': info_asiento.get('descripcion_clase'),
+                            'precio_unitario': info_asiento.get('precio_unitario'),
+                            'precio_total': info_asiento.get('precio_total_formateado'),
+                            'asientos_libres': info_asiento.get('asiento_disponible_clase'),
+                            'cupo_info': info_asiento
+                        }
+                        #Creamos nuestra lista de vuelos:
+                        vuelos_encontrados.append(resultado_final)
+
+    # PRINT DE CONTROL FINAL
+    print("\n" + "="*60)
+    print(f"FINAL: {len(vuelos_encontrados)} vuelos enviados al front")
+    print("="*60 + "\n")
+    return vuelos_encontrados
+
+def vuelos_disponibles(request):
+    # 1. Obtención de datos
+    try:
+        id_origen = int(request.GET.get('id_origen', 0))
+        id_destino = int(request.GET.get('id', 0))
+        pasajeros = int(request.GET.get('cantidad_personas', 1))
+        clase = int(request.GET.get('clase_vuelo', 1))
+    except ValueError:
+        return render(request, 'error.html', {'mensaje': 'Parámetros numéricos inválidos'})
+    
+    fecha = request.GET.get('fecha_ingreso')
+    criterio_filtro = request.GET.get('orden', 'recomendado')
+    error_sql = None
+    vuelos_filtrados = []
+
+    # 2. Validación 
+    if not id_origen or not id_destino or not fecha:
+        return render(request, 'lista_vuelos.html', {'vuelos': [], 'error_sql': "Faltan parámetros de búsqueda"})
+    # 3. Logica de la busqueda
+    try:
+        # Consultamos los vuelos disponibles:
+        vuelos = mostrarVuelosDisponibles(id_origen, id_destino, fecha, pasajeros, clase)
+        # Aplicamos los filtros
+        vuelos_filtrados = aplicarFiltrosResultados(vuelos, criterio_filtro)
+
+    except Exception as e:
+        error_sql = str(e)
+        # Esto mostrará por consola el error exacto si algo falla
+        print(f"ERROR CRÍTICO EN LA BÚSQUEDA: {error_sql}")
+        
+    # 4. Retornamos a la interfaz
+    return render(request, 'lista_vuelos.html', {
+        'vuelos': vuelos_filtrados,
+        'orden_actual': criterio_filtro,
+        'error_sql': error_sql
+    })
+
+def obtener_destinos_vuelos(request):
+    # 1. Obtenemos el término que manda el fetch del JS (?term=...)
+    termino = request.GET.get('term', '').strip()
+    
+    # 2. Si hay texto, filtramos. Si no, cortamos acá.
+    if not termino:
+        return JsonResponse([], safe=False)
+
+    localidades = Localidad.objects.select_related('provincia__pais').filter(
+        nombre_localidad__icontains=termino
+    )[:10]
+
+    # 4. Formateamos la salida
+    resultados = []
+    for loc in localidades:
+        resultados.append({
+            'id': loc.id_localidad,
+            'destino': f"{loc.nombre_localidad}, {loc.provincia.nombre_provincia}, Argentina",
+            'tipo': 'localidad'
+        })
+    
+    return JsonResponse(resultados, safe=False)
+
+def api_destinos(request):
+    # 1. Capturamos lo que el usuario escribió 
+    termino = request.GET.get('term', '').strip()
+    
+
+    # 2. Si hay menos de 2 letras, no buscamos nada (evita procesar de más)
+    if len(termino) < 2:
+        return JsonResponse([], safe=False)
+
+    # 3. Aplicamos el filtro clave: __icontains 
+    # Usamos select_related para traer la provincia de una sola vez
+    query = Localidad.objects.select_related('provincia').filter(
+        nombre_localidad__icontains=termino
+    )[:10] # Limitamos a 10 resultados para que la lista no sea gigante
+
+    # 4. Construimos la lista de diccionarios
+    resultados = []
+    for loc in query:
+        resultados.append({
+            'id': loc.id_localidad,
+            'destino': f"{loc.nombre_localidad}, {loc.provincia.nombre_provincia}, Argentina",
+            'tipo': 'localidad'
+        })
+
+    return JsonResponse(resultados, safe=False)
 
 def index_vuelos(request):
     return render(request,'index_vuelos.html')
 
+#Modulo hoteles
 def index_alojamientos (request):
     return render (request, 'index_alojamientos.html')
 
@@ -29,11 +187,12 @@ def obtener_destinos(request):
     localidades = Localidad.objects.select_related('provincia__pais').all()
 
     destinos = []
+    print(localidades.query)
     for loc in localidades:
         destinos.append({
             'destino': f"{loc.nombre_localidad}, {loc.provincia.nombre_provincia}, {loc.provincia.pais.nombre_pais}",
             'tipo': 'localidad',
-            'id': loc.id
+            'id': loc.id_localidad
         })
 
     return JsonResponse(destinos, safe=False)

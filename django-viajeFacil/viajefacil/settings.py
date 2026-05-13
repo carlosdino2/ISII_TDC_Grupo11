@@ -87,7 +87,9 @@ WSGI_APPLICATION = 'viajefacil.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'mssql',
-        'NAME': 'viajefacil',
+        'NAME': 'ViajeFacil1',
+        #'NAME': 'viajeFacil', #bd para modulo hoteles
+        
         'HOST': 'DESKTOP-4Q7306R\\SQLEXPRESS', #Esto se modifica por la instancia de SQL Server de la compu
         'PORT': '',
 
