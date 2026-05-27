@@ -1,0 +1,263 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %} Viaje Fácil - Vuelos Disponibles {% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/lista_hoteles.css' %}">
+<link rel="stylesheet" href="{% static 'css/lista_vuelos.css' %}">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+    /* CSS para el Timeline Visual */
+    .flight-path {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 40px;
+    }
+
+    .flight-line {
+        height: 2px;
+        background-color: #dee2e6;
+        width: 100%;
+        position: absolute;
+        top: 50%;
+        z-index: 1;
+    }
+
+    .flight-plane {
+        position: relative;
+        z-index: 2;
+        background-color: white;
+        padding: 0 10px;
+        color: #0d3b66;
+        font-size: 1.2rem;
+    }
+
+    .duration-text {
+        position: absolute;
+        top: -15px;
+        width: 100%;
+        text-align: center;
+        font-size: 0.85rem;
+        color: #6c757d;
+        z-index: 3;
+    }
+
+    /* Estilos de la tarjeta */
+    .card-vuelo {
+        transition: transform 0.2s, box-shadow 0.2s;
+        border: none;
+    }
+
+    .card-vuelo:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    .price-section {
+        border-left: 1px solid #eee;
+        background-color: #f8f9fa;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+
+<div style="background-color: #0d3b66;" class="min-vh-100">
+    <div class="container pt-5 pb-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="text-white mb-0 h2">Ya casi lo tenes! Llená los datos y completá tu reserva.</h1>
+        </div>
+        <!--1era tarjeta-->
+        <div class="row justify-content-center">
+            <div class="col-10">
+                <div class="alert alert-light border-0 shadow-sm rounded-4 p-4">
+                    <h3 class="text-black">¿Quien va a viajar?</h3>
+                    <hr class="my-4 border-3 rounded-4">
+                    <div class="row">
+                        <div class="col-6">
+                            <p class="text-black">Nombre</p>
+                            <input type="text" id="nombre-viajero" class="form-control border-3"
+                                placeholder="Como aparece en su documento" autocomplete="off">
+                        </div>
+                        <div class="col-6">
+
+                            <p class="text-black">Apellido</p>
+                            <input type="text" id="apellido-viajero" class="form-control border-3"
+                                placeholder="Como aparece en su documento" autocomplete="off">
+                        </div>
+                    </div>
+                    <div class="row pt-4">
+                        <div class="col-6">
+                            <p class="text-black">Nro DNI</p>
+                            <input type="text" id="dni-viajero" class="form-control border-3"
+                                placeholder="Ingresá sin puntos ni guiones" autocomplete="off" maxlength="8">
+                        </div>
+                        <div class="col-6">
+                            <p class="text-black">Fecha de nacimiento</p>
+                            <input type="text" id="nac-viajero" class="form-control border-3" placeholder="dd/mm/aaaa"
+                                autocomplete="off" maxlength="10">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--2da tarjeta-->
+         <div class="row justify-content-center">
+            <div class="col-10">
+                <div class="alert alert-light border-0 shadow-sm rounded-4 p-4">
+                    <h3 class="text-black">Datos de contacto</h3>
+                    <hr class="my-4 border-3 rounded-4">
+                    <h3 class="text-black h5 pb-4">El email que ingreses será esencial para manejar tu reservación y recibir información importante sobre tu viaje</h3>
+                    <div class="row">
+                        <div class="col-6">
+                            <p class="text-black">Email</p>
+                            <input type="email" id="email-viajero" class="form-control border-3"
+                                placeholder="Ingresa tu email" autocomplete="off">
+                        </div>
+                        <div class="col-6">
+
+                            <p class="text-black">Confirmá tu email</p>
+                            <input type="email" id="confirmar-email-viajero" class="form-control border-3"
+                                placeholder="Ingresa tu email" autocomplete="off">
+                        </div>
+                    </div>
+                    <div class="row pt-4">
+                        <div class="col-6">
+                            <p class="text-black">Cod. Área</p>
+                            <input type="text" id="cod-area-viajero" class="form-control border-3"
+                                placeholder="Cod. Área" autocomplete="off" maxlength="4">
+                        </div>
+                        <div class="col-6">
+                            <p class="text-black">Teléfono</p>
+                            <input type="text" id="tel-viajero" class="form-control border-3" placeholder="Ingrese su numéro de teléfono"
+                                autocomplete="off" maxlength="10">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-9">
+                <h1 class="text-white mb-0 h5">He leído y acepto todos los términos, condiciones de compra y politicas de privacidad.</h1>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    //Validaciones del nombre,apellido, dni y fecha de nacimiento
+    document.addEventListener('DOMContentLoaded', () => {
+        const nombreInput = document.getElementById('nombre-viajero');
+        const apellidoInput = document.getElementById('apellido-viajero');
+        const dniInput = document.getElementById('dni-viajero');
+        const nacInput = document.getElementById('nac-viajero');
+
+        // 1. Validar Nombre y Apellido (Solo letras y espacios)
+        const soloLetras = (e) => {
+            // La expresión regular reemplaza cualquier caracter que NO sea letra (incluyendo acentos y ñ) o espacio por un string vacío.
+            e.target.value = e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
+        };
+
+        nombreInput.addEventListener('input', soloLetras);
+        apellidoInput.addEventListener('input', soloLetras);
+
+        // 2. Validar DNI (Solo números sin puntos ni guiones)
+        dniInput.addEventListener('input', (e) => {
+            // Elimina todo lo que no sea un dígito (\D)
+            e.target.value = e.target.value.replace(/\D/g, '');
+        });
+
+        // Validar que el DNI tenga un mínimo de 8 dígitos cuando el usuario hace click fuera del input (evento 'blur')
+        dniInput.addEventListener('blur', (e) => {
+            if (e.target.value.length > 0 && e.target.value.length < 8) {
+                alert('El DNI debe tener al menos 8 dígitos.');
+                // Opcional: podrías limpiar el campo haciendo e.target.value = '';
+                // o agregar una clase de Bootstrap para pintarlo de rojo: e.target.classList.add('is-invalid');
+            } else {
+                e.target.classList.remove('is-invalid');
+            }
+        });
+
+        // 3. Validar y formatear Fecha de Nacimiento (dd/mm/aaaa)
+        nacInput.addEventListener('input', (e) => {
+            // Primero, eliminamos letras y caracteres especiales dejando solo números
+            let v = e.target.value.replace(/\D/g, '');
+
+            // Luego, formateamos inyectando la barra '/' en las posiciones correctas
+            if (v.length >= 5) {
+                e.target.value = `${v.substring(0, 2)}/${v.substring(2, 4)}/${v.substring(4, 8)}`;
+            } else if (v.length >= 3) {
+                e.target.value = `${v.substring(0, 2)}/${v.substring(2, 4)}`;
+            } else {
+                e.target.value = v; // Si tiene 1 o 2 dígitos, lo deja igual
+            }
+        });
+    });
+//Validaciones del email y del teléfono
+    document.addEventListener('DOMContentLoaded', () => {
+    // Referencias a los elementos de la segunda tarjeta
+    const emailInput = document.getElementById('email-viajero');
+    const confirmEmailInput = document.getElementById('confirmar-email-viajero');
+    const codAreaInput = document.getElementById('cod-area-viajero');
+    const telInput = document.getElementById('tel-viajero');
+
+    // 1. Validar que el Código de Área y Teléfono solo acepten números
+    const soloNumeros = (e) => {
+        // Elimina todo lo que no sea un dígito (\D)
+        e.target.value = e.target.value.replace(/\D/g, '');
+    };
+
+    codAreaInput.addEventListener('input', soloNumeros);
+    telInput.addEventListener('input', soloNumeros);
+
+    // 2. Función para validar el formato del correo (algo@algo.com)
+    const validarFormatoEmail = (email) => {
+        // Expresión regular estándar para correos
+        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return regex.test(email);
+    };
+
+    // Validar el formato al salir del campo de email principal
+    emailInput.addEventListener('blur', (e) => {
+        const email = e.target.value;
+        if (email.length > 0 && !validarFormatoEmail(email)) {
+            alert('Por favor, ingresa un formato de email válido (ejemplo: usuario@correo.com).');
+            // Opcional: e.target.classList.add('is-invalid');
+        } else {
+            // Opcional: e.target.classList.remove('is-invalid');
+        }
+    });
+
+    // 3. Validar que los emails coincidan
+    const checkEmailsMatch = () => {
+        const email = emailInput.value;
+        const confirmEmail = confirmEmailInput.value;
+        
+        // Solo verificamos si el campo de confirmación no está vacío
+        if (confirmEmail.length > 0 && email !== confirmEmail) {
+            alert('Los correos electrónicos no coinciden. Por favor, verificalos.');
+            // Opcional: confirmEmailInput.classList.add('is-invalid');
+        } else {
+            // Opcional: confirmEmailInput.classList.remove('is-invalid');
+        }
+    };
+
+    // Verificamos la coincidencia cuando el usuario sale del campo de confirmación
+    confirmEmailInput.addEventListener('blur', checkEmailsMatch);
+
+    // También verificamos por si el usuario cambia el email original DESPUÉS de haber llenado la confirmación
+    emailInput.addEventListener('blur', () => {
+        if (confirmEmailInput.value.length > 0) {
+            checkEmailsMatch();
+        }
+    });
+});
+</script>
+{% endblock %}

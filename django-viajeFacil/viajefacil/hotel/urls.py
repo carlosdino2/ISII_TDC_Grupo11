@@ -27,5 +27,7 @@ urlpatterns = [
     path('vuelos/', views.index_vuelos, name='index_vuelos'),
     path('api/destinos/', views.obtener_destinos_vuelos, name='api_destinos'),
     path('vuelos-disponibles/', views.vuelos_disponibles, name='vuelos_disponibles'),
+    path('checkout/', views.checkout, name='checkout'),
+
     
 ]

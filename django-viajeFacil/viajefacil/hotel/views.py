@@ -22,6 +22,9 @@ from django.shortcuts import render
 from .utils import verificarRuta,buscarPorFecha,consultarCupo
 
 #Modulo vuelos
+def checkout(request):
+    return render(request, 'checkout-vuelo.html')
+
 def aplicarFiltrosResultados(lista_vuelos, criterio):
     if not lista_vuelos:
         return []
