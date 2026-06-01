@@ -20,9 +20,11 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from django.shortcuts import render
 from .utils import verificarRuta,buscarPorFecha,consultarCupo
+from .strategy.filtros import FiltroMasBaratos, FiltroMasRapidos, FiltroRecomendados
+from .strategy.aplicarFiltros import AplicarFiltrosContexto
 
 #Modulo vuelos
-def aplicarFiltrosResultados(lista_vuelos, criterio):
+""" def aplicarFiltrosResultados(lista_vuelos, criterio):
     if not lista_vuelos:
         return []
 
@@ -38,7 +40,7 @@ def aplicarFiltrosResultados(lista_vuelos, criterio):
         # Ordenamos según la opción recomendado
         lista_vuelos.sort(key=lambda x: (x['precio_unitario'], x['duracion_minutos']))
         
-    return lista_vuelos
+    return lista_vuelos """
 
 def mostrarVuelosDisponibles(id_origen, id_destino, fecha, pasajeros, clase):
     #Creamos nuestra coleccion de vuelos vacía
@@ -108,8 +110,17 @@ def vuelos_disponibles(request):
     try:
         # Consultamos los vuelos disponibles:
         vuelos = mostrarVuelosDisponibles(id_origen, id_destino, fecha, pasajeros, clase)
-        # Aplicamos los filtros
-        vuelos_filtrados = aplicarFiltrosResultados(vuelos, criterio_filtro)
+        # Aplicamos los filtros segun estrategia
+        if criterio_filtro == 'barato':
+            estrategia = FiltroMasBaratos()
+        elif criterio_filtro == 'rapido':
+            estrategia = FiltroMasRapidos()
+        else:
+            estrategia = FiltroRecomendados()
+        
+        filtroEstrategia = AplicarFiltrosContexto(estrategia)
+        vuelos_filtrados = filtroEstrategia.aplicar_filtro(vuelos)
+        #vuelos_filtrados = aplicarFiltrosResultados(vuelos, criterio_filtro)
 
     except Exception as e:
         error_sql = str(e)
