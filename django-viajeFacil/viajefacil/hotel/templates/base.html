@@ -17,7 +17,7 @@
 <header>
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
-            <a class="navbar-brand d-flex align-items-center" href="{% url 'hotel:buscar_alojamientos' %}">
+            <a class="navbar-brand d-flex align-items-center" href="{% url 'hotel:index_vuelos' %}">
                 <img src="{% static 'img/logo.png' %}" alt="Viaje Fácil" height="50" class="me-2">
                 Viaje Fácil
             </a>
@@ -41,9 +41,7 @@
                     <li class="nav-item">
                         <a class="nav-link" href="#" onclick="wip()">Paquetes</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="wip()">Mis reservas</a>
-                    </li>
+                 
                 </ul>
                 <div class="d-flex ms-lg-3 mt-3 mt-lg-0 gap-2">
                     <button class="btn btn-outline-light" id="btn-register" onclick="registrarUsuario()">Registrarse</button>

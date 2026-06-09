@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load humanize %} ```
 
-{% block title %} Viaje Fácil - Vuelos Disponibles {% endblock %}
+{% block title %} Viaje Fácil - Confirmar Reserva {% endblock %}
 
 {% block css %}
 <link rel="stylesheet" href="{% static 'css/lista_hoteles.css' %}">
@@ -10,44 +11,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
-    /* CSS para el Timeline Visual */
-    .flight-path {
-        position: relative;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 40px;
-    }
-
-    .flight-line {
-        height: 2px;
-        background-color: #dee2e6;
-        width: 100%;
-        position: absolute;
-        top: 50%;
-        z-index: 1;
-    }
-
-    .flight-plane {
-        position: relative;
-        z-index: 2;
-        background-color: white;
-        padding: 0 10px;
-        color: #0d3b66;
-        font-size: 1.2rem;
-    }
-
-    .duration-text {
-        position: absolute;
-        top: -15px;
-        width: 100%;
-        text-align: center;
-        font-size: 0.85rem;
-        color: #6c757d;
-        z-index: 3;
-    }
-
-    /* Estilos de la tarjeta */
+    /* Estilos de las tarjetas y estados */
     .card-vuelo {
         transition: transform 0.2s, box-shadow 0.2s;
         border: none;
@@ -58,206 +22,526 @@
         box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
     }
 
-    .price-section {
-        border-left: 1px solid #eee;
-        background-color: #f8f9fa;
+    /* Estilo para deshabilitado visual del botón de compra */
+    #btn-comprar:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        background-color: #e9ecef !important;
+        color: #6c757d !important;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-
-
 <div style="background-color: #0d3b66;" class="min-vh-100">
-    <div class="container pt-5 pb-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1 class="text-white mb-0 h2">Ya casi lo tenes! Llená los datos y completá tu reserva.</h1>
+    <div class="container pt-5 pb-5">
+        <!--Titulos-->
+        <div class="row gx-lg-5 mb-4 align-items-end">
+            <div class="col-12 col-lg-8">
+                <h1 class="text-white mb-0 h2">Ya casi lo tenés! Llená los datos y completá tu reserva.</h1>
+            </div>
+            <div class="col-12 col-lg-4 d-none d-lg-block">
+                <h2 class="text-white mb-0 h4">Detalle del pago</h2>
+            </div>
         </div>
-        <!--1era tarjeta-->
-        <div class="row justify-content-center">
-            <div class="col-10">
-                <div class="alert alert-light border-0 shadow-sm rounded-4 p-4">
-                    <h3 class="text-black">¿Quien va a viajar?</h3>
-                    <hr class="my-4 border-3 rounded-4">
-                    <div class="row">
-                        <div class="col-6">
-                            <p class="text-black">Nombre</p>
-                            <input type="text" id="nombre-viajero" class="form-control border-3"
-                                placeholder="Como aparece en su documento" autocomplete="off">
+        <div class="row gx-lg-5">
+            <!--tarjetas de datos-->
+            <div class="col-12 col-lg-8">
+                <form id="form-checkout" method="POST"
+                    action="{% url 'hotel:reservarVuelo' cant id_clase id_programacion_vuelo %}">
+                    {% csrf_token %}
+                    <!--Datos del viajero-->
+                    {% for i in cantidad_pasajeros_loop %}
+                    <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h4 class="text-black fw-bold mb-0">
+                                <i class="bi bi-person-fill text-success"></i> Pasajero {{ forloop.counter }}
+                            </h4>
                         </div>
-                        <div class="col-6">
 
-                            <p class="text-black">Apellido</p>
-                            <input type="text" id="apellido-viajero" class="form-control border-3"
-                                placeholder="Como aparece en su documento" autocomplete="off">
+                        <div class="row g-3">
+                            <div class="col-12 col-md-6">
+                                <label class="form-label text-black fw-semibold">Nombre</label>
+                                <input type="text" name="nombre_viajero_{{ forloop.counter }}" class="form-control"
+                                    placeholder="Como aparece en su documento" required>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label text-black fw-semibold">Apellido</label>
+                                <input type="text" name="apellido_viajero_{{ forloop.counter }}" class="form-control"
+                                    placeholder="Como aparece en su documento" required>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label text-black fw-semibold">Nro DNI</label>
+                                <input type="text" name="dni_viajero_{{ forloop.counter }}" class="form-control"
+                                    placeholder="Ingresá sin puntos ni guiones" required max="8">
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label text-black fw-semibold">Fecha de nacimiento</label>
+                                <input type="date" name="nac_viajero_{{ forloop.counter }}" class="form-control"
+                                    required>
+                            </div>
                         </div>
                     </div>
-                    <div class="row pt-4">
-                        <div class="col-6">
-                            <p class="text-black">Nro DNI</p>
-                            <input type="text" id="dni-viajero" class="form-control border-3"
-                                placeholder="Ingresá sin puntos ni guiones" autocomplete="off" maxlength="8">
+                    {% endfor %}
+                    <!--Datos de contacto-->
+                    <div class="alert alert-light border-0 shadow-sm rounded-4 p-0 mb-4">
+                        <div class="d-flex justify-content-between align-items-center p-4">
+                            <div class="d-flex align-items-center gap-3">
+                                <h3 class="text-black mb-0">Datos de contacto</h3>
+                                <span id="status-contacto" class="fs-5" title="Estado">⚪</span>
+                            </div>
+                            <button type="button" id="btn-toggle-contacto"
+                                class="btn text-primary fw-bold text-decoration-none" style="color: #4a148c !important;"
+                                onclick="toggleTarjeta('cuerpo-contacto', this)">
+                                Completar
+                            </button>
                         </div>
-                        <div class="col-6">
-                            <p class="text-black">Fecha de nacimiento</p>
-                            <input type="text" id="nac-viajero" class="form-control border-3" placeholder="dd/mm/aaaa"
-                                autocomplete="off" maxlength="10">
+                        <div id="cuerpo-contacto" class="p-4 d-none pb-4 border-top">
+                            <p class="text-muted mb-4">El email que ingreses será esencial para manejar tu reservación y
+                                recibir información importante sobre tu viaje.</p>
+                            <div class="row">
+                                <div class="col-6">
+                                    <p class="text-black mb-1">Email</p>
+                                    <input type="email" id="email-viajero" class="form-control border-3"
+                                        placeholder="Ingresa tu email" autocomplete="off" name="email_contacto">
+                                </div>
+                                <div class="col-6">
+                                    <p class="text-black mb-1">Confirmá tu email</p>
+                                    <input type="email" id="confirmar-email-viajero" class="form-control border-3"
+                                        placeholder="Ingresa tu email" autocomplete="off">
+                                </div>
+                            </div>
+                            <div class="row pt-4">
+                                <div class="col-6">
+                                    <p class="text-black mb-1">Cod. Área</p>
+                                    <input type="text" id="cod-area-viajero" class="form-control border-3"
+                                        placeholder="Cod. Área" autocomplete="off" maxlength="4"
+                                        name="cod_area_contacto">
+                                </div>
+                                <div class="col-6">
+                                    <p class="text-black mb-1">Teléfono</p>
+                                    <input type="text" id="tel-viajero" class="form-control border-3"
+                                        placeholder="Ingrese su numéro de teléfono" autocomplete="off" maxlength="8"
+                                        name="telefono_contacto">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--Datos de pago-->
+                    <div class="alert alert-light border-0 shadow-sm rounded-4 p-0 mb-4">
+                        <div class="d-flex justify-content-between align-items-center p-4">
+                            <div class="d-flex align-items-center gap-3">
+                                <h3 class="text-black mb-0">¿Cómo querés pagar?</h3>
+                                <span id="status-pago" class="fs-5" title="Estado">⚪</span>
+                            </div>
+                            <button type="button" id="btn-toggle-pago"
+                                class="btn text-primary fw-bold text-decoration-none" style="color: #4a148c !important;"
+                                onclick="toggleTarjeta('cuerpo-pago', this)">
+                                Completar
+                            </button>
+                        </div>
+                        <div id="cuerpo-pago" class="p-4 d-none pb-4 border-top">
+                            <div class="row mb-4">
+                                <div class="col-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="metodo_pago" value="credito"
+                                            id="radioCredito" checked>
+                                        <label class="form-check-label text-dark fw-bold" for="radioCredito">Tarjeta de
+                                            crédito</label>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="metodo_pago" value="debito"
+                                            id="radioDebito">
+                                        <label class="form-check-label text-dark fw-bold" for="radioDebito">Tarjeta de
+                                            débito</label>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="metodo_pago"
+                                            value="mercadopago" id="radioMercadoPago">
+                                        <label class="form-check-label text-dark fw-bold" for="radioMercadoPago">Mercado
+                                            Pago</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-6">
+                                    <p class="text-black mb-1">Número de Tarjeta</p>
+                                    <input type="text" id="numero-tarjeta" class="form-control border-3"
+                                        placeholder="Ingresa el numéro de tu tarjeta" autocomplete="off" maxlength="16"
+                                        name="num_tarjeta">
+                                </div>
+                                <div class="col-6">
+                                    <p class="text-black mb-1">Titular de la tarjeta</p>
+                                    <input type="text" id="titular-tarjeta" class="form-control border-3"
+                                        placeholder="Como figura en la tarjeta" autocomplete="off" maxlength="50"
+                                        name="titular_tarjeta">
+                                </div>
+                            </div>
+                            <div class="row pt-4">
+                                <div class="col-5">
+                                    <p class="text-black mb-1">Vencimiento</p>
+                                    <input type="text" id="vencimiento-tarjeta" class="form-control border-3"
+                                        placeholder="MM/AA" autocomplete="off" maxlength="5" name="venc_tarjeta">
+                                </div>
+                                <div class="col-2">
+                                    <p class="text-black mb-1">Cod. Seguridad</p>
+                                    <input type="text" id="codigo-seguridad" class="form-control border-3"
+                                        placeholder="Ej: 123" autocomplete="off" maxlength="4"
+                                        name="cod_seguridad_tarjeta">
+                                </div>
+                                <div class="col-5">
+                                    <p class="text-black mb-1">DNI Titular</p>
+                                    <input type="text" id="dni-titular" class="form-control border-3"
+                                        placeholder="Ej: 12345678" autocomplete="off" maxlength="8" name="dni_titular">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--Terminos y condiciones-->
+                    <div class="mt-4">
+                        <div class="form-check mb-4">
+                            <input class="form-check-input" type="checkbox" id="check-terminos">
+                            <label class="form-check-label" for="check-terminos">
+                                <span class="text-white fw-normal">He leído y acepto todos los términos, condiciones de
+                                    compra y políticas de privacidad.</span>
+                            </label>
+                        </div>
+                        <button type="submit" id="btn-comprar" class="btn fw-bold px-5 py-3 rounded-4 fs-5 shadow"
+                            style="background-color: #faf0ca; border: none; color: #0d3b66;">
+                            Comprar
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <!--Datos del vuelo: costos y destinos-->
+            <div class="col-12 col-lg-4 mt-4 mt-lg-0">
+                <div class="alert alert-light border-0 shadow-sm rounded-4 p-4 mb-4">
+
+                    <div class="d-flex justify-content-between mb-3">
+                        {% if cant == 1 %}
+                        <span class="text-secondary fw-bold">Vuelo para 1 persona</span>
+                        {% else %}
+                        <span class="text-secondary fw-bold">Vuelo para {{ cant }} personas</span>
+                        {% endif %}
+                        <span class="text-black">$ {{ detalle.precio_base|intcomma }}</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="text-secondary">Impuestos</span>
+                        <span class="text-black">$ {{ detalle.impuestos|intcomma }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="text-secondary">Tasas</span>
+                        <span class="text-black">$ {{ detalle.tasas|intcomma }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="text-secondary">Cargos de gestión</span>
+                        <span class="text-black">$ {{ detalle.cargos|intcomma }}</span>
+                    </div>
+
+                    <hr class="text-muted">
+
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <span class="text-black fw-bold h5 mb-0">TOTAL</span>
+                        <div class="text-end">
+                            <span class="text-black fw-bold h3 mb-0">$ {{ detalle.precio_total|intcomma }}</span>
+                            {% if cant > 1 %}
+                            <br>
+
+                            {% endif %}
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="alert alert-light border-0 shadow-sm rounded-4 p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-black h4 fw-bold mb-0">Tu viaje</span>
+
+                    </div>
+                    <hr class="text-muted">
+                    <div class="d-flex gap-3 mt-3">
+                        <i class="bi bi-airplane text-secondary fs-4"></i>
+                        <div>
+                            <p class="text-black fw-bold mb-1">{{ destinos.provincia_origen }} -
+                                {{destinos.provincia_destino }}</p>
+                            <p class="text-secondary small mb-0">IDA: {{ destinos.fecha_salida }} -
+                                {{destinos.hora_salida }}</p>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <!--2da tarjeta-->
-         <div class="row justify-content-center">
-            <div class="col-10">
-                <div class="alert alert-light border-0 shadow-sm rounded-4 p-4">
-                    <h3 class="text-black">Datos de contacto</h3>
-                    <hr class="my-4 border-3 rounded-4">
-                    <h3 class="text-black h5 pb-4">El email que ingreses será esencial para manejar tu reservación y recibir información importante sobre tu viaje</h3>
-                    <div class="row">
-                        <div class="col-6">
-                            <p class="text-black">Email</p>
-                            <input type="email" id="email-viajero" class="form-control border-3"
-                                placeholder="Ingresa tu email" autocomplete="off">
-                        </div>
-                        <div class="col-6">
 
-                            <p class="text-black">Confirmá tu email</p>
-                            <input type="email" id="confirmar-email-viajero" class="form-control border-3"
-                                placeholder="Ingresa tu email" autocomplete="off">
-                        </div>
-                    </div>
-                    <div class="row pt-4">
-                        <div class="col-6">
-                            <p class="text-black">Cod. Área</p>
-                            <input type="text" id="cod-area-viajero" class="form-control border-3"
-                                placeholder="Cod. Área" autocomplete="off" maxlength="4">
-                        </div>
-                        <div class="col-6">
-                            <p class="text-black">Teléfono</p>
-                            <input type="text" id="tel-viajero" class="form-control border-3" placeholder="Ingrese su numéro de teléfono"
-                                autocomplete="off" maxlength="10">
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row justify-content-center">
-            <div class="col-9">
-                <h1 class="text-white mb-0 h5">He leído y acepto todos los términos, condiciones de compra y politicas de privacidad.</h1>
-            </div>
         </div>
     </div>
 </div>
 
 <script>
-    //Validaciones del nombre,apellido, dni y fecha de nacimiento
+    // --- 1. FUNCIONES AUXILIARES GLOBALES ---
+    function toggleTarjeta(idCuerpo, btnElement) {
+        const cuerpo = document.getElementById(idCuerpo);
+        if (cuerpo.classList.contains('d-none')) {
+            cuerpo.classList.remove('d-none');
+            btnElement.innerText = 'Ocultar';
+        } else {
+            cuerpo.classList.add('d-none');
+            btnElement.innerText = 'Completar';
+        }
+    }
+
+    // Filtros de entrada en vivo
+    const soloLetras = (e) => { e.target.value = e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, ''); };
+    const soloNumeros = (e) => { e.target.value = e.target.value.replace(/\D/g, ''); };
+
+    // Validaciones lógicas (con silenciador opcional para el botón comprar)
+    function validarFechaNacimiento(fechaTexto, mostrarAlert = true) {
+        if (!fechaTexto) return false;
+        const partes = fechaTexto.split('-');
+        const fechaIngresada = new Date(parseInt(partes[0], 10), parseInt(partes[1], 10) - 1, parseInt(partes[2], 10));
+        const hoy = new Date();
+        const limite90 = new Date();
+        limite90.setFullYear(hoy.getFullYear() - 90);
+
+        if (fechaIngresada > hoy) {
+            if (mostrarAlert) alert("La fecha de nacimiento no puede ser en el futuro.");
+            return false;
+        }
+        if (fechaIngresada < limite90) {
+            if (mostrarAlert) alert("Por políticas de la empresa, la edad máxima permitida para viajar es de 90 años.");
+            return false;
+        }
+        return true;
+    }
+
+    function validarVencimientoTarjeta(vencimientoTexto, mostrarAlert = true) {
+        if (vencimientoTexto.length !== 5) return false;
+        const partes = vencimientoTexto.split('/');
+        const mesIngresado = parseInt(partes[0], 10);
+        const anioIngresado = parseInt(partes[1], 10) + 2000;
+
+        if (mesIngresado < 1 || mesIngresado > 12) {
+            if (mostrarAlert) alert("El mes de vencimiento de la tarjeta no es válido (debe ser entre 01 y 12).");
+            return false;
+        }
+
+        const hoy = new Date();
+        const mesActual = hoy.getMonth() + 1;
+        const anioActual = hoy.getFullYear();
+
+        if (anioIngresado < anioActual || (anioIngresado === anioActual && mesIngresado < mesActual)) {
+            if (mostrarAlert) alert("La tarjeta ingresada se encuentra vencida.");
+            return false;
+        }
+        return true;
+    }
+
+    // --- 2. INICIALIZACIÓN DE EVENTOS EN VIVO (BLUR E INPUT) ---
     document.addEventListener('DOMContentLoaded', () => {
-        const nombreInput = document.getElementById('nombre-viajero');
-        const apellidoInput = document.getElementById('apellido-viajero');
-        const dniInput = document.getElementById('dni-viajero');
-        const nacInput = document.getElementById('nac-viajero');
+        const cantPasajeros = parseInt("{{ cant }}") || 1;
 
-        // 1. Validar Nombre y Apellido (Solo letras y espacios)
-        const soloLetras = (e) => {
-            // La expresión regular reemplaza cualquier caracter que NO sea letra (incluyendo acentos y ñ) o espacio por un string vacío.
-            e.target.value = e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
-        };
+        // --- VALIDACIONES: PASAJEROS ---
+        for (let i = 1; i <= cantPasajeros; i++) {
+            const nomInput = document.getElementsByName(`nombre_viajero_${i}`)[0];
+            const apeInput = document.getElementsByName(`apellido_viajero_${i}`)[0];
+            const dniInput = document.getElementsByName(`dni_viajero_${i}`)[0];
+            const nacInput = document.getElementsByName(`nac_viajero_${i}`)[0];
 
-        nombreInput.addEventListener('input', soloLetras);
-        apellidoInput.addEventListener('input', soloLetras);
+            nomInput.addEventListener('input', soloLetras);
+            apeInput.addEventListener('input', soloLetras);
+            dniInput.addEventListener('input', soloNumeros);
 
-        // 2. Validar DNI (Solo números sin puntos ni guiones)
-        dniInput.addEventListener('input', (e) => {
-            // Elimina todo lo que no sea un dígito (\D)
-            e.target.value = e.target.value.replace(/\D/g, '');
-        });
+            dniInput.addEventListener('blur', (e) => {
+                const val = e.target.value;
+                if (val.length > 0 && (val.length < 7 || val.length > 8)) {
+                    alert(`El DNI del Pasajero ${i} debe tener entre 7 y 8 dígitos.`);
+                }
+            });
 
-        // Validar que el DNI tenga un mínimo de 8 dígitos cuando el usuario hace click fuera del input (evento 'blur')
-        dniInput.addEventListener('blur', (e) => {
-            if (e.target.value.length > 0 && e.target.value.length < 8) {
-                alert('El DNI debe tener al menos 8 dígitos.');
-                // Opcional: podrías limpiar el campo haciendo e.target.value = '';
-                // o agregar una clase de Bootstrap para pintarlo de rojo: e.target.classList.add('is-invalid');
-            } else {
-                e.target.classList.remove('is-invalid');
+            nacInput.addEventListener('blur', (e) => {
+                if (e.target.value !== '' && !validarFechaNacimiento(e.target.value, true)) {
+                    e.target.value = ''; 
+                }
+            });
+        }
+
+        // --- VALIDACIONES: DATOS DE CONTACTO ---
+        const emailInput = document.getElementById('email-viajero');
+        const confirmEmailInput = document.getElementById('confirmar-email-viajero');
+        const codAreaInput = document.getElementById('cod-area-viajero');
+        const telInput = document.getElementById('tel-viajero');
+
+        codAreaInput.addEventListener('input', soloNumeros);
+        telInput.addEventListener('input', soloNumeros);
+
+        emailInput.addEventListener('blur', (e) => {
+            const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (e.target.value.length > 0 && !regex.test(e.target.value)) {
+                alert('Por favor, ingresá un formato de email válido (ej: nombre@correo.com).');
             }
         });
 
-        // 3. Validar y formatear Fecha de Nacimiento (dd/mm/aaaa)
-        nacInput.addEventListener('input', (e) => {
-            // Primero, eliminamos letras y caracteres especiales dejando solo números
-            let v = e.target.value.replace(/\D/g, '');
+        confirmEmailInput.addEventListener('blur', (e) => {
+            if (e.target.value.length > 0 && emailInput.value !== e.target.value) {
+                alert('Los correos electrónicos no coinciden.');
+            }
+        });
 
-            // Luego, formateamos inyectando la barra '/' en las posiciones correctas
-            if (v.length >= 5) {
-                e.target.value = `${v.substring(0, 2)}/${v.substring(2, 4)}/${v.substring(4, 8)}`;
-            } else if (v.length >= 3) {
-                e.target.value = `${v.substring(0, 2)}/${v.substring(2, 4)}`;
+        codAreaInput.addEventListener('blur', (e) => {
+            const val = e.target.value;
+            if (val.length > 0 && (val.length < 2 || val.length > 4)) {
+                alert('El código de área debe tener entre 2 y 4 dígitos.');
+            }
+        });
+
+        telInput.addEventListener('blur', (e) => {
+            const val = e.target.value;
+            if (val.length > 0 && (val.length < 6 || val.length > 8)) {
+                alert('El número de teléfono debe tener entre 6 y 8 dígitos.');
+            }
+        });
+
+        // --- VALIDACIONES: DATOS DE PAGO ---
+        const radiosPago = document.querySelectorAll('input[name="metodo_pago"]');
+        const numTarjetaInput = document.getElementById('numero-tarjeta');
+        const titularInput = document.getElementById('titular-tarjeta');
+        const vencimientoInput = document.getElementById('vencimiento-tarjeta');
+        const codSeguridadInput = document.getElementById('codigo-seguridad');
+        const dniTitularInput = document.getElementById('dni-titular');
+
+        radiosPago.forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                if (e.target.value !== 'credito') {
+                    alert('Opción de pago no disponible por el momento.');
+                    document.getElementById('radioCredito').checked = true;
+                }
+            });
+        });
+
+        numTarjetaInput.addEventListener('input', soloNumeros);
+        titularInput.addEventListener('input', soloLetras);
+        codSeguridadInput.addEventListener('input', soloNumeros);
+        dniTitularInput.addEventListener('input', soloNumeros);
+
+        numTarjetaInput.addEventListener('blur', (e) => {
+            const val = e.target.value;
+            if (val.length > 0 && (val.length < 13 || val.length > 16)) {
+                alert('El número de tarjeta debe tener entre 13 y 16 dígitos.');
+            }
+        });
+
+        codSeguridadInput.addEventListener('blur', (e) => {
+            const val = e.target.value;
+            if (val.length > 0 && (val.length < 3 || val.length > 4)) {
+                alert('El código de seguridad debe tener entre 3 y 4 dígitos.');
+            }
+        });
+
+        dniTitularInput.addEventListener('blur', (e) => {
+            const val = e.target.value;
+            if (val.length > 0 && (val.length < 7 || val.length > 8)) {
+                alert('El DNI del titular de la tarjeta debe tener entre 7 y 8 dígitos.');
+            }
+        });
+
+        vencimientoInput.addEventListener('input', (e) => {
+            let v = e.target.value.replace(/\D/g, ''); 
+            if (v.length > 2) {
+                v = v.substring(0, 2) + '/' + v.substring(2, 4);
+            }
+            e.target.value = v;
+        });
+
+        vencimientoInput.addEventListener('blur', (e) => {
+            if (e.target.value.length > 0 && e.target.value.length === 5) {
+                if (!validarVencimientoTarjeta(e.target.value, true)) {
+                    e.target.value = '';
+                }
+            } else if (e.target.value.length > 0 && e.target.value.length < 5) {
+                alert('El vencimiento debe tener el formato MM/AA (ej: 12/26).');
+            }
+        });
+
+        // --- 3. VALIDACIÓN ESTRICTA FINAL AL PRESIONAR "COMPRAR" ---
+        document.getElementById('form-checkout').addEventListener('submit', (e) => {
+            let errores = [];
+            const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+            // 1. Términos
+            const checkTerminos = document.getElementById('check-terminos');
+            if (!checkTerminos.checked) {
+                errores.push("Falta aceptar los términos y condiciones.");
+            }
+
+            // 2. Control de Pasajeros (Obligatorio evaluar formato real y duplicados)
+            let dnisIngresados = []; // <-- NUEVO: Arreglo para guardar los DNIs que vamos leyendo
+
+            for (let i = 1; i <= cantPasajeros; i++) {
+                const nom = document.getElementsByName(`nombre_viajero_${i}`)[0].value.trim();
+                const ape = document.getElementsByName(`apellido_viajero_${i}`)[0].value.trim();
+                const dni = document.getElementsByName(`dni_viajero_${i}`)[0].value.trim();
+                const nac = document.getElementsByName(`nac_viajero_${i}`)[0].value.trim();
+
+                if (!nom || !ape || !dni || !nac) {
+                    errores.push(`Faltan completar datos en el Pasajero ${i}.`);
+                } else {
+                    // --- NUEVO: Control de duplicados ---
+                    if (dnisIngresados.includes(dni)) {
+                        errores.push(`El DNI ${dni} está repetido en el Pasajero ${i}. Cada viajero debe tener un documento distinto.`);
+                    } else {
+                        dnisIngresados.push(dni); // Si no está repetido, lo agregamos a la lista
+                    }
+                    // ------------------------------------
+
+                    if (dni.length < 7 || dni.length > 8) {
+                        errores.push(`El DNI del Pasajero ${i} debe tener entre 7 y 8 dígitos.`);
+                    }
+                    if (!validarFechaNacimiento(nac, false)) {
+                        errores.push(`La fecha de nacimiento del Pasajero ${i} no cumple con las políticas.`);
+                    }
+                }
+            }
+
+            // 3. Control de Contacto (Auditoría profunda)
+            const email = emailInput.value.trim();
+            const confEmail = confirmEmailInput.value.trim();
+            const codArea = codAreaInput.value.trim();
+            const tel = telInput.value.trim();
+
+            if (!email || !confEmail || !codArea || !tel) {
+                errores.push("Faltan completar campos en la sección de Contacto.");
             } else {
-                e.target.value = v; // Si tiene 1 o 2 dígitos, lo deja igual
+                if (!regexEmail.test(email)) errores.push("El formato de email de contacto es inválido.");
+                if (email !== confEmail) errores.push("Los correos electrónicos no coinciden.");
+                if (codArea.length < 2 || codArea.length > 4) errores.push("El código de área debe tener entre 2 y 4 dígitos.");
+                if (tel.length < 6 || tel.length > 8) errores.push("El número de teléfono debe tener entre 6 y 8 dígitos.");
+            }
+
+            // 4. Control de Tarjeta (Filtro final)
+            const numTarjeta = numTarjetaInput.value.trim();
+            const titular = titularInput.value.trim();
+            const vencimiento = vencimientoInput.value.trim();
+            const codSeguridad = codSeguridadInput.value.trim();
+            const dniTitular = dniTitularInput.value.trim();
+
+            if (!numTarjeta || !titular || !vencimiento || !codSeguridad || !dniTitular) {
+                errores.push("Faltan completar campos en la sección de Pago.");
+            } else {
+                if (numTarjeta.length < 13 || numTarjeta.length > 16) errores.push("El número de tarjeta es inválido.");
+                if (!validarVencimientoTarjeta(vencimiento, false)) errores.push("El vencimiento de la tarjeta es inválido o expiró.");
+                if (codSeguridad.length < 3 || codSeguridad.length > 4) errores.push("El código de seguridad de la tarjeta es incorrecto.");
+                if (dniTitular.length < 7 || dniTitular.length > 8) errores.push("El DNI del titular debe tener entre 7 y 8 dígitos.");
+            }
+
+            // 5. El Veredicto
+            if (errores.length > 0) {
+                e.preventDefault(); // CONGELA LA COMPRA HASTA QUE SE ARREGLE
+                alert("No se pudo procesar la reserva. Por favor corregí los siguientes errores:\n\n- " + errores.join("\n- "));
             }
         });
     });
-//Validaciones del email y del teléfono
-    document.addEventListener('DOMContentLoaded', () => {
-    // Referencias a los elementos de la segunda tarjeta
-    const emailInput = document.getElementById('email-viajero');
-    const confirmEmailInput = document.getElementById('confirmar-email-viajero');
-    const codAreaInput = document.getElementById('cod-area-viajero');
-    const telInput = document.getElementById('tel-viajero');
-
-    // 1. Validar que el Código de Área y Teléfono solo acepten números
-    const soloNumeros = (e) => {
-        // Elimina todo lo que no sea un dígito (\D)
-        e.target.value = e.target.value.replace(/\D/g, '');
-    };
-
-    codAreaInput.addEventListener('input', soloNumeros);
-    telInput.addEventListener('input', soloNumeros);
-
-    // 2. Función para validar el formato del correo (algo@algo.com)
-    const validarFormatoEmail = (email) => {
-        // Expresión regular estándar para correos
-        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return regex.test(email);
-    };
-
-    // Validar el formato al salir del campo de email principal
-    emailInput.addEventListener('blur', (e) => {
-        const email = e.target.value;
-        if (email.length > 0 && !validarFormatoEmail(email)) {
-            alert('Por favor, ingresa un formato de email válido (ejemplo: usuario@correo.com).');
-            // Opcional: e.target.classList.add('is-invalid');
-        } else {
-            // Opcional: e.target.classList.remove('is-invalid');
-        }
-    });
-
-    // 3. Validar que los emails coincidan
-    const checkEmailsMatch = () => {
-        const email = emailInput.value;
-        const confirmEmail = confirmEmailInput.value;
-        
-        // Solo verificamos si el campo de confirmación no está vacío
-        if (confirmEmail.length > 0 && email !== confirmEmail) {
-            alert('Los correos electrónicos no coinciden. Por favor, verificalos.');
-            // Opcional: confirmEmailInput.classList.add('is-invalid');
-        } else {
-            // Opcional: confirmEmailInput.classList.remove('is-invalid');
-        }
-    };
-
-    // Verificamos la coincidencia cuando el usuario sale del campo de confirmación
-    confirmEmailInput.addEventListener('blur', checkEmailsMatch);
-
-    // También verificamos por si el usuario cambia el email original DESPUÉS de haber llenado la confirmación
-    emailInput.addEventListener('blur', () => {
-        if (confirmEmailInput.value.length > 0) {
-            checkEmailsMatch();
-        }
-    });
-});
 </script>
 {% endblock %}

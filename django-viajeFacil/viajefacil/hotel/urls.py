@@ -14,7 +14,7 @@ urlpatterns = [
     path('seleccionar-categoria/', views.seleccionar_categoria, name='seleccionar_categoria'),
     path('reserva/', views.detalle_reserva, name='detalle_reserva'),
     path('register/', views.vista_registro, name='vista_registro'),
-    path('reserva-exitosa/', views.reserva_exitosa, name='reserva_exitosa'),
+    #path('reserva-exitosa/', views.reserva_exitosa, name='reserva_exitosa'),
     path('generar-detalle/', views.generar_detalle_reserva, name='generar_detalle_reserva'),
     path('confirmar-reserva/', views.procesar_reserva_completa, name='procesar_reserva'),
     path('factura/<int:id_reserva>/', views.ver_factura, name='ver_factura'),
@@ -27,7 +27,10 @@ urlpatterns = [
     path('vuelos/', views.index_vuelos, name='index_vuelos'),
     path('api/destinos/', views.obtener_destinos_vuelos, name='api_destinos'),
     path('vuelos-disponibles/', views.vuelos_disponibles, name='vuelos_disponibles'),
-    path('checkout/', views.checkout, name='checkout'),
+    path('checkout/<int:cant>/<int:id_clase>/<int:id_programacion_vuelo>/', views.checkout, name='checkout'),
+    path('reserva-vuelo/<int:cant>/<int:id_clase>/<int:id_programacion_vuelo>/', views.reservarVuelo, name='reservarVuelo'),
+    path('comprobante-vuelo/<int:id_pago>/', views.generarComprobanteReservaVuelo, name='generarComprobanteReservaVuelo'),
+    
 
     
 ]

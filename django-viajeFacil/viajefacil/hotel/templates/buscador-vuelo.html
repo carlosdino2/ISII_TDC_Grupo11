@@ -3,6 +3,11 @@
 {% block css %}
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+    .input-uniforme {
+        height: 42px !important;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -20,17 +25,17 @@
         <form id="form-buscador" class="row gx-2 gy-3 align-items-end px-3" method="get"
             action="{% url 'hotel:vuelos_disponibles' %}">
 
-            <div class="col-12 col-md-3 position-relative">
+            <div class="col-10 col-md-3 position-relative">
                 <label class="text-white-50 small mb-1">Origen</label>
-                <input type="text" id="origen" class="form-control" placeholder="Elija un origen" autocomplete="off">
+                <input type="text" id="origen" class="form-control input-uniforme" placeholder="Elija un origen" autocomplete="off">
                 <input type="hidden" id="origen_tipo" name="tipo_origen">
                 <input type="hidden" id="origen_id" name="id_origen">
                 <div id="sugerencias_origen" class="list-group position-absolute w-100" style="z-index: 1000;"></div>
             </div>
 
-            <div class="col-12 col-md-3 position-relative">
+            <div class="col-10 col-md-3 position-relative">
                 <label class="text-white-50 small mb-1">Destino</label>
-                <input type="text" id="destino" class="form-control" placeholder="Elija un destino" autocomplete="off">
+                <input type="text" id="destino" class="form-control input-uniforme" placeholder="Elija un destino" autocomplete="off">
                 <input type="hidden" id="destino_tipo" name="tipo">
                 <input type="hidden" id="destino_id" name="id">
                 <div id="sugerencias_destino" class="list-group position-absolute w-100" style="z-index: 1000;"></div>
@@ -38,22 +43,22 @@
 
             <div class="col-6 col-md-2">
                 <label class="text-white-50 small mb-1">Fecha de salida</label>
-                <input type="date" id="fecha_entrada" class="form-control" name="fecha_ingreso">
+                <input type="date" id="fecha_entrada" class="form-control input-uniforme" name="fecha_ingreso">
             </div>
 
-            <div class="col-4 col-md-2">
+            <div class="col-1 col-md-1">
                 <label class="text-white-50 small mb-1">Pasajeros</label>
                 <div class="position-relative">
                     <i
                         class="bi bi-person-fill position-absolute top-50 start-0 translate-middle-y ms-2 text-muted"></i>
-                    <input onkeydown="return false;" type="number" class="form-control ps-4" value="1" min="1" max="6"
+                    <input onkeydown="return false;" type="number" class="form-control ps-4 input-uniforme" value="1" min="1" max="6"
                         name="cantidad_personas">
                 </div>
             </div>
 
             <div class="col-4 col-md-2">
                 <label class="text-white-50 small mb-1">Clase</label>
-                <select id="clase_vuelo" name="clase_vuelo" class="form-select bg-white text-dark">
+                <select id="clase_vuelo" name="clase_vuelo" class="form-select bg-white text-dark input-uniforme">
                     <option value="1" selected>Económica</option>
                     <option value="2">Ejecutiva</option>
                     <option value="3">Primera Clase</option>

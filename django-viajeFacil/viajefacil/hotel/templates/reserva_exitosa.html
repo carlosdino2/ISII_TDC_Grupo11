@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
 
 {% load static %}
+{% load humanize %} ```
+
 
 {% block title %} Viaje Fácil {% endblock %}
 
@@ -8,18 +10,172 @@
 <link rel="stylesheet" href="{% static 'css/index_alojamientos.css' %}">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+    /* Oculta el navbar por completo en la pantalla normal */
+    nav, .navbar {
+        display: none !important;
+    }
 
+    .factura-container {
+        max-width: 900px;
+        margin: auto;
+        padding: 1.2rem;
+        background: #fff;
+        border: 1px solid #ccc;
+        font-family: 'Segoe UI', sans-serif;
+    }
 
+    .factura-boton {
+        padding: 0 2rem;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    .factura-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .factura-header h2 {
+        margin: 0;
+    }
+
+    .factura-section {
+        margin-bottom: 0.6rem;
+    }
+
+    .factura-section h4 {
+        border-bottom: 5px solid #0D6EFD;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .factura-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .factura-table th,
+    .factura-table td {
+        border: none;
+
+        padding: 0.75rem;
+        text-align: left;
+    }
+
+    .factura-totales td {
+        font-weight: bold;
+    }
+
+    .text-right {
+        text-align: right;
+    }
+
+    @media print {
+        /* 1. Ocultamos explícitamente todo lo que tenga la clase d-print-none */
+        .d-print-none, 
+        nav, 
+        footer, 
+        button, 
+        a {
+            display: none !important;
+        }
+
+        /* 2. Le quitamos el color azul al fondo y lo volvemos transparente/blanco */
+        #fondo-checkout {
+            background-color: transparent !important;
+            background: none !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+
+        /* 3. Forzamos a que la factura ocupe el 100% de la hoja sin márgenes raros */
+        .factura-container {
+            max-width: 100% !important;
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            border: none !important; /* Opcional: le saca el borde verde grueso al imprimir */
+            box-shadow: none !important;
+        }
+
+        /* 4. Configuramos la hoja A4 eliminando los encabezados nativos del navegador (URL, fecha en las esquinas) */
+        @page {
+            size: auto;   /* auto es el valor para que tome la configuración de la impresora */
+            margin: 15mm;  /* Margen limpio para que no tape el texto */
+        }
+        
+        body {
+            background-color: #fff !important;
+            color: #000 !important;
+            font-size: 11pt;
+        }
+    }
+</style>
 {% endblock %}
 
 {% block content %}
-<div class="container">
-    <p class="text-success fs-1 mt-5">
-        La reserva se realizó exitosamente. <i class="bi bi-emoji-smile"></i>
-    </p>
-    <a class="btn btn-success fs-5" href="{% url 'hotel:buscar_alojamientos' %}">Inicio
-    </a>
+
+<div id="fondo-checkout" style="background-color: #0d3b66;" class="min-vh-100 pt-3">
+    <div class="container ">
+        <div class="container pt-1 pb-4 d-print-none">
+            <p class="text-white fs-3 mt-3">
+                La reserva se realizó con éxito. ¡Se envió el comprobante al correo!</i>
+            </p>
+        </div>
+        <div class="factura-container" style="background-color: #fff;">
+            <div class="factura-header mb-2">
+                <h2>Comprobante de Reserva</h2>
+                <p>Reserva N° 000-{{ id_reserva }}
+                    <small>Emitido el {{ fecha_reserva }}</small>
+                </p>
+            </div>
+            <div class="factura-section">
+                <h4><i class="bi bi-airplane-fill text-primary me-2"></i> Detalles del Vuelo</h4>
+                <div class="row mt-2">
+                    <div class="col-md-6">
+                        <p><strong>Aerolínea:</strong> {{ nombre_aerolinea }}</p>
+                        <p><strong>Origen:</strong> {{ provincia_origen }} ({{ aeropuerto_origen }})</p>
+                        <p><strong>Salida:</strong> {{ fecha_salida }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Cupos reservados:</strong> <span class="badge bg-primary fs-7">{{ cantidad_asientos}}
+                                Pasajeros</span></p>
+                        <p><strong>Destino:</strong> {{ provincia_destino }} ({{ aeropuerto_destino }})</p>
+                        <p><strong>Llegada:</strong> {{ fecha_llegada }}</p>
+                    </div>
+                </div>
+                <p class="mb-1"><strong>Clase:</strong> {{ descripcion_clase }} | <strong>Estado del Vuelo:</strong>
+                    <span class="badge bg-primary fs-7">{{ descripcion_estado_reserva }}</span></p>
+            </div>
+
+            <div class="factura-section">
+                <h4><i class="bi bi-credit-card-2-back-fill text-primary me-2"></i> Detalles del Pago</h4>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Responsable de Reserva:</strong> {{ titular_tarjeta|title }}</p>
+                        <p class="mb-1"><strong>Fecha de Pago:</strong> {{ fecha_pago }}</p>
+                        <p class="mb-1"><strong>Transacción N°:</strong> 000-{{ numero_transaccion|floatformat:0 }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Medio de Pago:</strong> {{ tipo_tarjeta }} | {{ descripcion_tarjeta }}
+                        </p>
+                        <p class="fs-6 text-black fw-bold mt-2">
+                            Monto Total: <span class="text-black">${{ total_pagar|floatformat:0|intcomma }}</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="d-flex justify-content-center gap-3 mt-4 mb-5 d-print-none">
+        <a class="btn btn-outline-light px-4 fs-5 rounded-3" href="{% url 'hotel:index_vuelos' %}">
+            <i class="bi bi-house-door-fill"></i> Volver al Inicio
+        </a>
+        <button class="btn btn-success px-5 fs-5 fw-bold rounded-3 shadow-sm" onclick="window.print()">
+            🖨️ Imprimir o Guardar PDF
+        </button>
+    </div>
+    </div>
+
 </div>
 
 {% endblock %}
-

@@ -162,9 +162,28 @@
                                     <div class="fw-bold text-dark">{{ vuelo.precio_total }}</div>
                                 </div>
 
-                                <a href="{% url 'hotel:checkout' %}" class="btn btn-primary btn-lg rounded-pill shadow-sm py-2">
-                                    Seleccionar <i class="bi bi-chevron-right ms-1"></i>
-                                </a>
+                                {% if vuelo.tipo_clase == 'Económica' %}
+                                <a href="{% url 'hotel:checkout' vuelo.cantidad_pasajeros 1 vuelo.id_programacion_vuelo %}"
+                                    class="btn fw-bold px-4"
+                                    style="background-color: #0d3b66; color: #faf0ca;">Seleccionar</a>
+
+                                {% elif vuelo.tipo_clase == 'Ejecutiva' %}
+                                <a href="{% url 'hotel:checkout' vuelo.cantidad_pasajeros 2 vuelo.id_programacion_vuelo %}"
+                                    class="btn fw-bold px-4"
+                                    style="background-color: #0d3b66; color: #faf0ca;">Seleccionar</a>
+
+                                {% elif vuelo.tipo_clase == 'Primera Clase' %}
+                                <a href="{% url 'hotel:checkout' vuelo.cantidad_pasajeros 3 vuelo.id_programacion_vuelo %}"
+                                    class="btn fw-bold px-4"
+                                    style="background-color: #0d3b66; color: #faf0ca;">Seleccionar</a>
+
+                                {% else %}
+                                <a href="{% url 'hotel:checkout' vuelo.cantidad_pasajeros 1 vuelo.id_programacion_vuelo %}"
+                                    class="btn fw-bold px-4"
+                                    style="background-color: #0d3b66; color: #faf0ca;">Seleccionar</a>
+                                {% endif %}
+
+                            
                             </div>
                         </div>
                     </div>

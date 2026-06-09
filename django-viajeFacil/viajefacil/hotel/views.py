@@ -16,14 +16,205 @@ from .utils import verificarOCrearDireccion,ingresarDatos,insertarCabeceraReserv
 from .utils import cancelarReserva,generarComprobanteCancelacion
 from django.http import JsonResponse
 from .models import Localidad
+from django.utils import timezone
 from django.shortcuts import render
 from django.http import JsonResponse
-from django.shortcuts import render
-from .utils import verificarRuta,buscarPorFecha,consultarCupo
+from .utils import verificarRuta,buscarPorFecha,consultarCupo,obtenerVueloCheckout,verificarEmailViajero,registrarViajeroTemporal,verificarDatosTarjetaViajero
+from .utils import reservarNuevoVuelo,actualizarDisponibilidadVuelo,registrarPago,generarComprobanteVuelo
 
 #Modulo vuelos
-def checkout(request):
-    return render(request, 'checkout-vuelo.html')
+def generarComprobanteReservaVuelo(request, id_pago):
+    try:
+        print(f"--> [VISTA COMPROBANTE] Iniciando carga para Pago N°: {id_pago}")
+        
+        # 1. Traemos la info cruda desde utils.py
+        resultado_raw = generarComprobanteVuelo(id_pago)
+
+        # --- DESEMPAQUETADO CRÍTICO ---
+        # Si devuelve una lista del estilo [ {datos...} ], extraemos el diccionario de la posición 0
+        if isinstance(resultado_raw, list) and len(resultado_raw) > 0:
+            datos_comprobante = resultado_raw[0]
+        elif isinstance(resultado_raw, dict):
+            datos_comprobante = resultado_raw
+        else:
+            datos_comprobante = None
+
+        # Si vino completamente vacío, lanzamos el error
+        if not datos_comprobante:
+            raise Exception(f"No se encontraron registros válidos en la BD para el Pago N° {id_pago}")
+
+        print(f"--> [DEBUG COMPROBANTE] Datos desempaquetados con éxito. Tipo: {type(datos_comprobante)}")
+
+        # 2. Ahora que es un diccionario puro, no va a fallar al asignarle los pasajeros
+        datos_comprobante['lista_pasajeros'] = request.session.get('pasajeros_reserva_actual', [])
+
+        # 3. Limpiamos la sesión por seguridad
+        if 'pasajeros_reserva_actual' in request.session:
+            del request.session['pasajeros_reserva_actual']
+
+        # 4. Renderizamos la plantilla con la factura armada
+        return render(request, 'reserva_exitosa.html', datos_comprobante)
+
+    except Exception as e:
+        print(f"--> [ERROR AL GENERAR COMPROBANTE]: {e}")
+        # Si querés que en vez de mandarte al index te deje el error en pantalla para debuguear, 
+        # podés comentar la línea de abajo y poner un "raise e"
+        raise e
+        #return redirect('hotel:index_vuelos')
+
+def reservarVuelo(request, cant, id_clase, id_programacion_vuelo):
+    # Solo aceptamos que entren a esta función si apretaron el botón "Comprar"
+    if request.method == 'POST':
+        try:
+            # 1. Capturamos la lista dinámica de pasajeros desde el formulario
+            lista_pasajeros = []
+            for i in range(1, cant + 1):
+                pasajero = {
+                    'nombre': request.POST.get(f'nombre_viajero_{i}', '').strip(),
+                    'apellido': request.POST.get(f'apellido_viajero_{i}', '').strip(),
+                    'dni': request.POST.get(f'dni_viajero_{i}', '').strip(),
+                    'fecha_nac': request.POST.get(f'nac_viajero_{i}', '')
+                }
+                lista_pasajeros.append(pasajero)
+
+            # 1.2. ALMACENAMIENTO TEMPORAL: Lo guardamos en la sesión de Django
+            request.session['pasajeros_reserva_actual'] = lista_pasajeros
+            
+            # 1. Procesamos Viajero y Tarjeta con las funciones auxiliares
+            id_viajero = verificarDatosViajero(request)
+            id_tarjeta = verificarDatosTarjeta(request)
+
+            # 2. Control de seguridad: Si falló la tarjeta, abortamos la reserva
+            if not id_tarjeta:
+                print("--> Abortando reserva: Hubo un error con la tarjeta.")
+                # Redirigimos de vuelta al checkout original
+                return redirect('hotel:checkout', cant=cant, id_clase=id_clase, id_programacion_vuelo=id_programacion_vuelo)
+
+            # 3. Recalculamos el precio de forma segura en el backend
+            cupos = consultarCupo(cant, id_clase, id_programacion_vuelo)
+            precio_base = float(cupos[0].get('precio_clase'))
+            detalle = calcular_costos_vuelo(precio_base,cant)
+            monto_total_vuelo = detalle.get('precio_total')
+
+            # 4. Impactamos la reserva en SQL Server
+            fecha_reserva = datetime.now()
+            # 4.1. ACOMODAMOS LA FECHA AL FORMATO ESTÁNDAR DE SQL SERVER
+            fecha_reserva_limpia = fecha_reserva.strftime('%Y-%m-%d %H:%M:%S')
+
+            id_reserva = reservarNuevoVuelo(fecha_reserva_limpia, monto_total_vuelo, cant, id_viajero, id_programacion_vuelo, id_clase)
+            print(f"--> ¡Reserva generada con éxito! ID de Reserva: {id_reserva}")
+
+            #5. Actualizamos la cantidad de asientos del vuelo:
+            actualizarDisponibilidadVuelo(id_clase,id_programacion_vuelo,cant)
+
+            # 5.1. DESEMPAQUETAMOS LOS IDS
+            id_tarjeta_limpio = id_tarjeta[0].get('ID_tarjeta') if isinstance(id_tarjeta, list) and id_tarjeta else id_tarjeta
+            id_reserva_limpio = id_reserva[0].get('ID_reserva') if isinstance(id_reserva, list) and id_reserva else id_reserva
+
+            #6. Registramos el pago en la bd
+            resultado_pago = registrarPago(fecha_reserva_limpia,monto_total_vuelo,id_tarjeta_limpio,id_reserva_limpio)
+
+            # 6.1. DESEMPAQUETAMOS EL ID DE PAGO
+            if isinstance(resultado_pago, list) and len(resultado_pago) > 0:
+                id_pago_limpio = resultado_pago[0].get('id_pago')
+            elif isinstance(resultado_pago, dict):
+                id_pago_limpio = resultado_pago.get('id_pago')
+            else:
+                id_pago_limpio = resultado_pago
+
+            #7.Redirigimos a la vista del comprobante
+            return redirect('hotel:generarComprobanteReservaVuelo', id_pago=id_pago_limpio)
+        #8. Devolvemos al checkout con el error
+        except Exception as error_compra:
+            print(f"--> [ERROR CRÍTICO EN FLUJO DE COMPRA]: {error_compra}")
+            # Si algo falla, lo mandamos de vuelta al checkout avisando el motivo
+            return redirect('hotel:checkout', cant=cant, id_clase=id_clase, id_programacion_vuelo=id_programacion_vuelo)
+
+def verificarDatosTarjeta(request):
+    #Obtenemos los datos de la tarjeta:
+    num_tarjeta =str(request.POST.get('num_tarjeta', 0))
+    titular_tarjeta = request.POST.get('titular_tarjeta',0)
+    vencimiento_tarjeta = str(request.POST.get('venc_tarjeta',0))
+    cod_seguridad_tarjeta = str(request.POST.get('cod_seguridad_tarjeta',0))
+    dni_titular = str(request.POST.get('dni_titular',0))
+   #verificamos los datos de la tarjeta, y si son correctos se insertan:
+    id_tarjeta = verificarDatosTarjetaViajero(num_tarjeta,titular_tarjeta,vencimiento_tarjeta,cod_seguridad_tarjeta,dni_titular)
+    if id_tarjeta:
+        print("----------->Tarjeta aprobada!")
+        return id_tarjeta
+    else:
+        print("----------->Error con la tarjeta!")
+        return None
+
+def verificarDatosViajero(request):
+        #Obtenemos los datos de contacto del viajero
+        email_contacto = str(request.POST.get('email_contacto', '')).strip()
+        cod_Area = str(request.POST.get('cod_area_contacto', '')).strip()
+        nro_contacto = str(request.POST.get('telefono_contacto', '')).strip()
+        telefono_completo = cod_Area + nro_contacto
+
+        #Verificamos si se encuentra registrado en nuestro sistema:
+        ID_viajero_temporal= verificarEmailViajero(email_contacto);
+
+        #Si el email ya se encuentra registrado:
+        if ID_viajero_temporal:
+         #Asociamos la reserva al ID del viajero
+         print("--> Viajero existente encontrado.")
+         #print(ID_viajero_temporal)
+         return ID_viajero_temporal[0].get("ID_viajero")
+
+        #Si *NO* se encuentra registrado:
+        else:
+            #Registramos al viajero temporalmente
+            print("--> Viajero nuevo. Registrando temporalmente...")
+            viajero_temporal = registrarViajeroTemporal(telefono_completo, email_contacto)
+            #print(viajero_temporal[0].get('id_viajero'))
+            return viajero_temporal[0].get("id_viajero")
+
+def checkout(request,cant,id_clase,id_programacion_vuelo):
+
+    #obtenemos el precio del vuelo seleccionado
+    cupos= consultarCupo(cant, id_clase, id_programacion_vuelo);
+    #obtenemos la info del vuelo (origen-destino-fecha de salida y hora)
+    destinos = obtenerVueloCheckout(id_programacion_vuelo)
+    #obtenemos el precio total del vuelo
+    precio_total = float(cupos[0].get('precio_clase'))
+    #obtenemos el detalle del costo del vuelo
+    detalle = calcular_costos_vuelo(precio_total,cant)
+    #mandamos a la vista
+    return render(request, 'checkout-vuelo.html',{
+        'cant':cant,
+        'cantidad_pasajeros_loop': range(cant),
+        'id_clase':id_clase,
+        'id_programacion_vuelo':id_programacion_vuelo,
+        'detalle':detalle,
+        'destinos':destinos[0]
+        })
+
+def calcular_costos_vuelo(precio_total,cant_personas):
+    # Definimos los porcentajes sobre el total
+    porcentaje_base = 0.351 #35.1% precio del vuelo sin impuestos nacionales
+    porcentaje_impuestos = 0.321 #32.1% impuestos
+    porcentaje_tasas = 0.193 #19.3% tasas aeroportuarias
+    porcentaje_cargos = 0.135 #13.5% cargos por servicios de ViajeFacil
+
+    # Calculamos cada componente
+    precio_base = round((precio_total * porcentaje_base)*cant_personas)
+    impuestos = round((precio_total * porcentaje_impuestos)*cant_personas)
+    tasas = round((precio_total * porcentaje_tasas)*cant_personas)
+    cargos = round((precio_total * porcentaje_cargos)*cant_personas)
+
+    total_extras = impuestos + tasas + cargos
+
+    # Retornamos un diccionario con todo listo para la vista
+    return {
+        'precio_base': precio_base,
+        'impuestos': impuestos,
+        'tasas': tasas,
+        'cargos': cargos,
+        'total_extras': total_extras,
+        'precio_total': precio_total*cant_personas
+    }
 
 def aplicarFiltrosResultados(lista_vuelos, criterio):
     if not lista_vuelos:
@@ -73,7 +264,9 @@ def mostrarVuelosDisponibles(id_origen, id_destino, fecha, pasajeros, clase):
                         #Armamos los datos para agregar a la lista de vuelos:
                         resultado_final = {
                             **vuelo_ruta,  
-                            **prog,        
+                            **prog,   
+                            'cantidad_pasajeros':pasajeros, 
+                            'id_programacion_vuelo':info_asiento.get('ID_programacion_vuelo'), 
                             'tipo_clase': info_asiento.get('descripcion_clase'),
                             'precio_unitario': info_asiento.get('precio_unitario'),
                             'precio_total': info_asiento.get('precio_total_formateado'),

@@ -22,6 +22,65 @@ def consultarCupo(cant, ID_clase, ID_programacion_vuelo):
                                [cant, ID_clase,ID_programacion_vuelo])
         columnas = [col[0] for col in cursor.description]
         return [dict(zip(columnas, fila)) for fila in cursor.fetchall()]
+    
+def obtenerVueloCheckout(ID_programacion_vuelo):
+    with connection.cursor() as cursor:
+        cursor.execute("EXEC obtenerVueloCheckout %s", 
+                               [ID_programacion_vuelo])
+        columnas = [col[0] for col in cursor.description]
+        return [dict(zip(columnas, fila)) for fila in cursor.fetchall()]
+    
+def verificarEmailViajero(email):
+ with connection.cursor() as cursor:
+        cursor.execute("EXEC verificarEmailViajero %s", 
+                               [email])
+        columnas = [col[0] for col in cursor.description]
+        return [dict(zip(columnas, fila)) for fila in cursor.fetchall()]
+
+def registrarViajeroTemporal(tel_viajero, email_viajero):
+    with connection.cursor() as cursor:
+        cursor.execute("EXEC registrarViajeroTemporal %s, %s", [tel_viajero, email_viajero])
+        columnas = [col[0] for col in cursor.description]
+        filas = cursor.fetchall()
+        resultado = [dict(zip(columnas, fila)) for fila in filas]
+        return resultado
+def verificarDatosTarjetaViajero(num_tarjeta,titular_tarjeta,vencimiento_tarjeta,cod_seguridad_tarjeta,dni_titular):
+    with connection.cursor() as cursor:
+        cursor.execute("EXEC verificarDatosTarjetaViajero %s, %s, %s,%s,%s", [num_tarjeta,titular_tarjeta,vencimiento_tarjeta,cod_seguridad_tarjeta,dni_titular])
+        columnas = [col[0] for col in cursor.description]
+        filas = cursor.fetchall()
+        resultado = [dict(zip(columnas, fila)) for fila in filas]
+        return resultado
+    
+def reservarNuevoVuelo(fecha_Reserva,monto_total_vuelo,cant_asiento,ID_viajero,ID_programacion_vuelo,ID_clase):
+    with connection.cursor() as cursor:
+        cursor.execute("EXEC reservarNuevoVuelo %s, %s, %s,%s,%s, %s", [fecha_Reserva,monto_total_vuelo,cant_asiento,ID_viajero,ID_programacion_vuelo,ID_clase])
+        columnas = [col[0] for col in cursor.description]
+        filas = cursor.fetchall()
+        resultado = [dict(zip(columnas, fila)) for fila in filas]
+        return resultado
+    
+def registrarPago(fecha_pago, monto_total,ID_tarjeta,ID_reserva_vuelo):
+      with connection.cursor() as cursor:
+        cursor.execute("EXEC registrarPagoReserva %s,%s,%s,%s", [fecha_pago, monto_total,ID_tarjeta,ID_reserva_vuelo])
+        columnas = [col[0] for col in cursor.description]
+        filas = cursor.fetchall()
+        resultado = [dict(zip(columnas, fila)) for fila in filas]
+        return resultado
+def generarComprobanteVuelo(id_pago):
+     with connection.cursor() as cursor:
+        cursor.execute("EXEC generarComprobanteReservaVuelo %s", [id_pago])
+        columnas = [col[0] for col in cursor.description]
+        filas = cursor.fetchall()
+        resultado = [dict(zip(columnas, fila)) for fila in filas]
+        return resultado
+
+def actualizarDisponibilidadVuelo(id_clase, id_programacion_vuelo, cant_asientos):
+    with connection.cursor() as cursor:
+        cursor.execute("EXEC actualizarDisponibilidadVuelo %s, %s, %s", [id_clase,id_programacion_vuelo, cant_asientos])
+        return True
+    
+
 
 #Mod Hoteles-------------------------------------------
 def obtenerHoteles():

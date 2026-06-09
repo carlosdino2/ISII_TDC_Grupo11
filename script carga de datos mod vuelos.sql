@@ -71,7 +71,7 @@ INSERT INTO Vuelos (ID_vuelo, numero_vuelo, duracion_estimada, origen_ID_aeropue
 (6, 1605, 125, 7, 6, 1), -- Corrientes -> Bariloche
 (7, 1610, 160, 7, 6, 2); -- Corrientes -> Bariloche
 
--- Programaciones para el 22 de Octubre de 2024
+-- Programaciones para el 22 de Octubre de 2026
 INSERT INTO Programacion_Vuelos (ID_programacion_vuelo, fecha_salida, fecha_llegada, asientos_disponibles, ID_vuelo, ID_estado_vuelo) VALUES
 (201, '2026-10-22 08:30:00', '2026-10-22 10:05:00', 120, 1, 1), -- Ctes -> Ros (Mañana)
 (202, '2026-10-22 16:00:00', '2026-10-22 17:35:00', 120, 2, 1), -- Ros -> Ctes (Tarde)
@@ -116,3 +116,13 @@ INSERT INTO Programaciones_Vuelos_Clases (ID_clase, ID_programacion_vuelo, asien
 --Flybondi
 INSERT INTO Programaciones_Vuelos_Clases (ID_clase, ID_programacion_vuelo, asiento_disponible_clase, precio_clase) VALUES
 (1, 207, 120, 90000.00)  -- Económica
+
+--Carga de tipos de tarjetas aceptadas por ViajeFacil
+INSERT INTO Tipos_Tarjetas (ID_tipo_tarjeta,descripcion_tarjeta) VALUES
+(1,'Mastercard/Crédito'),
+(2,'Mastercard/Débito'),
+(3,'Visa/Crédito'),
+(4,'Visa/Débito'),
+(5,'American Express/Crédito'),
+(6,'Galicia/Crédito'),
+(7,'Galicia/Débito');
