@@ -20,6 +20,8 @@ from django.http import JsonResponse
 from .models import Localidad
 from django.utils import timezone
 from django.shortcuts import render
+from .strategy.filtros import FiltroMasBaratos, FiltroMasRapidos, FiltroRecomendados
+from .strategy.aplicarFiltros import AplicarFiltrosContexto
 from django.http import JsonResponse
 from .utils import verificarRuta,buscarPorFecha,consultarCupo,obtenerVueloCheckout,verificarEmailViajero,registrarViajeroTemporal,verificarDatosTarjetaViajero
 from .utils import reservarNuevoVuelo,actualizarDisponibilidadVuelo,registrarPago,generarComprobanteVuelo
@@ -236,7 +238,9 @@ def calcular_costos_vuelo(precio_total,cant_personas):
         'precio_total': precio_total*cant_personas
     }
 
-def aplicarFiltrosResultados(lista_vuelos, criterio):
+
+
+#def aplicarFiltrosResultados(lista_vuelos, criterio):
     if not lista_vuelos:
         return []
 
@@ -303,7 +307,7 @@ def mostrarVuelosDisponibles(id_origen, id_destino, fecha, pasajeros, clase):
     return vuelos_encontrados
 
 def vuelos_disponibles(request):
-    # 1. Obtención de datos
+      # 1. Obtención de datos
     try:
         id_origen = int(request.GET.get('id_origen', 0))
         id_destino = int(request.GET.get('id', 0))
@@ -324,8 +328,17 @@ def vuelos_disponibles(request):
     try:
         # Consultamos los vuelos disponibles:
         vuelos = mostrarVuelosDisponibles(id_origen, id_destino, fecha, pasajeros, clase)
-        # Aplicamos los filtros
-        vuelos_filtrados = aplicarFiltrosResultados(vuelos, criterio_filtro)
+        # Aplicamos los filtros segun estrategia
+        if criterio_filtro == 'barato':
+            estrategia = FiltroMasBaratos()
+        elif criterio_filtro == 'rapido':
+            estrategia = FiltroMasRapidos()
+        else:
+            estrategia = FiltroRecomendados()
+        
+        filtroEstrategia = AplicarFiltrosContexto(estrategia)
+        vuelos_filtrados = filtroEstrategia.aplicar_filtro(vuelos)
+        #vuelos_filtrados = aplicarFiltrosResultados(vuelos, criterio_filtro)
 
     except Exception as e:
         error_sql = str(e)
