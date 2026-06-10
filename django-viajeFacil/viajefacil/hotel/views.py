@@ -4,6 +4,8 @@ from django.core.paginator import Paginator
 from .models import Hotel, Localidad
 from django.db import connection
 from datetime import datetime
+from django.utils.html import strip_tags
+from django.conf import settings
 import locale
 from decimal import Decimal, ROUND_HALF_UP
 from django.contrib import messages
@@ -27,11 +29,10 @@ def generarComprobanteReservaVuelo(request, id_pago):
     try:
         print(f"--> [VISTA COMPROBANTE] Iniciando carga para Pago N°: {id_pago}")
         
-        # 1. Traemos la info cruda desde utils.py
+        # 1. Traemos la info de la BD
         resultado_raw = generarComprobanteVuelo(id_pago)
 
         # --- DESEMPAQUETADO CRÍTICO ---
-        # Si devuelve una lista del estilo [ {datos...} ], extraemos el diccionario de la posición 0
         if isinstance(resultado_raw, list) and len(resultado_raw) > 0:
             datos_comprobante = resultado_raw[0]
         elif isinstance(resultado_raw, dict):
@@ -45,22 +46,41 @@ def generarComprobanteReservaVuelo(request, id_pago):
 
         print(f"--> [DEBUG COMPROBANTE] Datos desempaquetados con éxito. Tipo: {type(datos_comprobante)}")
 
-        # 2. Ahora que es un diccionario puro, no va a fallar al asignarle los pasajeros
-        datos_comprobante['lista_pasajeros'] = request.session.get('pasajeros_reserva_actual', [])
-
-        # 3. Limpiamos la sesión por seguridad
-        if 'pasajeros_reserva_actual' in request.session:
-            del request.session['pasajeros_reserva_actual']
+        # --- ENVÍO DE CORREO ELECTRÓNICO ---
+        email_destino = datos_comprobante.get('email_viajero')
+        print(email_destino)
+        
+        if email_destino:
+            print(f"--> [CORREO] Preparando envío para: {email_destino}")
+            
+            # 1. Armamos el Asunto
+            asunto = f"Confirmación de Reserva N° 000-{datos_comprobante.get('id_reserva')} - ViajeFácil"
+            
+            # 2. Renderizamos el HTML 
+            html_content = render_to_string('reserva_exitosa.html', datos_comprobante)
+            
+            # 3. Creamos una versión en texto plano por si el correo del cliente no soporta HTML
+            text_content = strip_tags(html_content)
+            
+            # 4. Configuramos el mensaje
+            msg = EmailMultiAlternatives(
+                subject=asunto,
+                body=text_content,
+                from_email=settings.EMAIL_HOST_USER,
+                to=[email_destino]
+            )
+            
+            # 5. Le adjuntamos  y enviamos
+            msg.attach_alternative(html_content, "text/html")
+            msg.send()
+            print("--> [CORREO] ¡Comprobante enviado con éxito!")
 
         # 4. Renderizamos la plantilla con la factura armada
         return render(request, 'reserva_exitosa.html', datos_comprobante)
 
     except Exception as e:
         print(f"--> [ERROR AL GENERAR COMPROBANTE]: {e}")
-        # Si querés que en vez de mandarte al index te deje el error en pantalla para debuguear, 
-        # podés comentar la línea de abajo y poner un "raise e"
-        raise e
-        #return redirect('hotel:index_vuelos')
+        return redirect('hotel:index_vuelos')
 
 def reservarVuelo(request, cant, id_clase, id_programacion_vuelo):
     # Solo aceptamos que entren a esta función si apretaron el botón "Comprar"

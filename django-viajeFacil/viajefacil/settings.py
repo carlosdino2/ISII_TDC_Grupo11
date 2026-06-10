@@ -34,7 +34,7 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'carlosdaniel313@gmail.com'
-EMAIL_HOST_PASSWORD = 'xdom qoth dxfd cuhz'
+EMAIL_HOST_PASSWORD = 'vdsk nqen qqsl gqob'
 
 
 # Application definition
