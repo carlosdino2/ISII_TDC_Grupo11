@@ -116,7 +116,6 @@ INSERT INTO Programaciones_Vuelos_Clases (ID_clase, ID_programacion_vuelo, asien
 --Flybondi
 INSERT INTO Programaciones_Vuelos_Clases (ID_clase, ID_programacion_vuelo, asiento_disponible_clase, precio_clase) VALUES
 (1, 207, 120, 90000.00)  -- Económica
-
 --Carga de tipos de tarjetas aceptadas por ViajeFacil
 INSERT INTO Tipos_Tarjetas (ID_tipo_tarjeta,descripcion_tarjeta) VALUES
 (1,'Mastercard/Crédito'),
@@ -126,3 +125,13 @@ INSERT INTO Tipos_Tarjetas (ID_tipo_tarjeta,descripcion_tarjeta) VALUES
 (5,'American Express/Crédito'),
 (6,'Galicia/Crédito'),
 (7,'Galicia/Débito');
+--Insertamos los tipos de tarjetas:
+INSERT INTO Tipos_Tarjetas(ID_tipo_tarjeta,descripcion_tarjeta) VALUES
+(1,'Crédito'),
+(2,'Débito')
+--Insertamos los estados de la reserva del vuelo
+INSERT INTO Estados_Reserva_Vuelo(ID_estado_reserva_vuelo,descripcion_estado_reserva) VALUES
+(1,'Confirmada'),
+(2,'Check-in pendiente'),
+(3,'Finalizado')
+

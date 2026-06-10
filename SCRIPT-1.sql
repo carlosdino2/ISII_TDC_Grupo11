@@ -1,7 +1,5 @@
--- use database viajefacil1
-GO
-
 -- 1. TABLAS MAESTRAS (Sin dependencias)
+
 CREATE TABLE Aerolineas(
     ID_aerolinea INT NOT NULL,
     nombre_aerolinea VARCHAR(100) NOT NULL,
@@ -32,7 +30,43 @@ CREATE TABLE Tipos_Tarjetas(
     CONSTRAINT PK_Tipos_Tarjetas PRIMARY KEY (ID_tipo_tarjeta)
 );
 
--- 2. INFRAESTRUCTURA Y USUARIOS
+--2. UBICACIONES
+CREATE TABLE Paises
+(
+  ID_pais INT NOT NULL,
+  nombre_pais VARCHAR(100) NOT NULL,
+  PRIMARY KEY (ID_pais)
+);
+
+CREATE TABLE Provincias
+(
+  ID_provincia INT NOT NULL,
+  nombre_provincia VARCHAR(150) NOT NULL,
+  ID_pais INT NOT NULL,
+  PRIMARY KEY (ID_provincia),
+  FOREIGN KEY (ID_pais) REFERENCES Paises(ID_pais)
+);
+CREATE TABLE Localidades
+(
+  ID_localidad INT NOT NULL,
+  nombre_localidad VARCHAR(150) NOT NULL,
+  ID_provincia INT NOT NULL,
+  PRIMARY KEY (ID_localidad),
+  FOREIGN KEY (ID_provincia) REFERENCES Provincias(ID_provincia)
+);
+
+CREATE TABLE Direcciones
+(
+  ID_direccion INT NOT NULL,
+  calle_direccion VARCHAR(150) NOT NULL,
+  numero_direccion INT NOT NULL,
+  cod_postal VARCHAR(20) NOT NULL,
+  ID_localidad INT NOT NULL,
+  PRIMARY KEY (ID_direccion),
+  FOREIGN KEY (ID_localidad) REFERENCES Localidades(ID_localidad)
+);
+
+-- 3. INFRAESTRUCTURA Y USUARIOS
 CREATE TABLE Aeropuertos(
     ID_aeropuerto INT NOT NULL,
     nombre_completo VARCHAR(300) NOT NULL,
@@ -40,7 +74,6 @@ CREATE TABLE Aeropuertos(
     CONSTRAINT PK_Aeropuertos PRIMARY KEY (ID_aeropuerto),
     CONSTRAINT FK_Aeropuertos_Direcciones FOREIGN KEY (ID_direccion) REFERENCES Direcciones(ID_direccion)
 );
-
 CREATE TABLE Tarjetas(
     ID_tarjeta INT NOT NULL,
     ID_tipo_tarjeta INT NOT NULL,
@@ -50,6 +83,7 @@ CREATE TABLE Tarjetas(
     apellido_titular VARCHAR(100) NOT NULL,
     dni_titular VARCHAR(8) NOT NULL,
     vencimiento_tarjeta CHAR(5) NOT NULL, -- Formato MM/YY
+	cod_seguridad_tarjeta VARCHAR(4) NOT NULL,
 
     PrimerDiaDelMesVencimiento AS (
         DATEFROMPARTS(
@@ -79,7 +113,22 @@ CREATE TABLE Tarjetas(
     CONSTRAINT CK_Tarjeta_Longitud CHECK (LEN(numeros_tarjeta) BETWEEN 13 AND 19)
 );
 
--- 3. LÓGICA DE VUELOS
+CREATE TABLE Viajeros
+(
+  ID_viajero INT NOT NULL,
+  identificacion_viajero VARCHAR (150),
+  nombre_viajero VARCHAR(150),
+  apellido_viajero VARCHAR(150),
+  telefono_viajero VARCHAR(15),
+  email_viajero VARCHAR(100),
+  fecha_nacimiento_viajero DATE,
+  clave_viajero VARCHAR(8),
+  ID_direccion INT,  
+  PRIMARY KEY (ID_viajero),
+  FOREIGN KEY (ID_direccion) REFERENCES Direcciones(ID_direccion)
+);
+
+-- 4. LÓGICA DE VUELOS
 CREATE TABLE Vuelos(
     ID_vuelo INT NOT NULL,
     numero_vuelo INT NOT NULL,
@@ -122,7 +171,7 @@ CREATE TABLE Programaciones_Vuelos_Clases(
     CONSTRAINT CK_Asiento_Clase_Positivo CHECK (asiento_disponible_clase >= 0)
 );
 
--- 4. TRANSACCIONES
+-- 5. TRANSACCIONES
 CREATE TABLE Reservas_Vuelos(
     ID_reserva_vuelo INT NOT NULL,
     fecha_reserva DATETIME2 NOT NULL,
